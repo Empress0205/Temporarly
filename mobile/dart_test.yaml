@@ -1,0 +1,18 @@
+# Test tags. See test/live_wiring_test.dart and test/golden_test.dart.
+tags:
+  golden:
+    description: >
+      Full-screen pixel comparisons against test/goldens/. Regenerate with
+      --update-goldens after an intentional visual change.
+
+  live:
+    description: >
+      Exercises the real JhHttpAuthApi against a running backend, rather than
+      the FakeAuthApi the rest of the suite uses. Needs the backend up on
+      :8000 with SMS_PROVIDER=logging.
+    # Skipped by default so `flutter test` never tries to open a socket.
+    # Force it with --run-skipped:
+    #   flutter test test/live_wiring_test.dart --run-skipped
+    skip: >
+      needs a live backend on :8000 (SMS_PROVIDER=logging) -- run with
+      --run-skipped once it's up

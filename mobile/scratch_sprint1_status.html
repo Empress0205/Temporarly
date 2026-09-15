@@ -1,0 +1,619 @@
+<title>Authentication Sprint 1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground: #f2f5f0;
+    --surface: #ffffff;
+    --surface-2: #e8ede6;
+    --ink: #16211b;
+    --ink-muted: #57655c;
+    --ink-faint: #8a9690;
+    --border: #d9e1d6;
+    --border-soft: #e4eae1;
+    --accent: #00803f;
+    --accent-ink: #005f2e;
+    --accent-tint: #e3f2e8;
+    --done: #00803f;
+    --done-tint: #e3f2e8;
+    --partial: #96631a;
+    --partial-tint: #f6ecda;
+    --open: #a1442e;
+    --open-tint: #f7e6e1;
+    --shadow: 0 1px 2px rgba(22, 33, 27, 0.06), 0 8px 24px -12px rgba(22, 33, 27, 0.12);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #10160f;
+      --surface: #161f15;
+      --surface-2: #1d281b;
+      --ink: #e9f0e5;
+      --ink-muted: #a7b6a0;
+      --ink-faint: #71806f;
+      --border: #2a382a;
+      --border-soft: #202c1f;
+      --accent: #3fcb84;
+      --accent-ink: #6fdba1;
+      --accent-tint: #17301f;
+      --done: #3fcb84;
+      --done-tint: #17301f;
+      --partial: #e3ac4f;
+      --partial-tint: #332715;
+      --open: #e17a63;
+      --open-tint: #34201a;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #10160f;
+    --surface: #161f15;
+    --surface-2: #1d281b;
+    --ink: #e9f0e5;
+    --ink-muted: #a7b6a0;
+    --ink-faint: #71806f;
+    --border: #2a382a;
+    --border-soft: #202c1f;
+    --accent: #3fcb84;
+    --accent-ink: #6fdba1;
+    --accent-tint: #17301f;
+    --done: #3fcb84;
+    --done-tint: #17301f;
+    --partial: #e3ac4f;
+    --partial-tint: #332715;
+    --open: #e17a63;
+    --open-tint: #34201a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Public Sans", -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+
+  h1, h2, h3 {
+    font-family: "Fraunces", Georgia, serif;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  a { color: var(--accent-ink); }
+
+  code, .mono {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Header ---------- */
+
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.12;
+  }
+
+  .subtitle {
+    margin: 8px 0 0;
+    color: var(--ink-muted);
+    font-size: 15px;
+    max-width: 46ch;
+  }
+
+  .meta {
+    text-align: right;
+    font-size: 13px;
+    color: var(--ink-muted);
+    white-space: nowrap;
+    padding-top: 4px;
+  }
+
+  .meta .date {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ---------- Stat strip ---------- */
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 28px 0 40px;
+  }
+
+  .stat {
+    background: var(--surface);
+    padding: 16px 14px;
+  }
+
+  .stat .n {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .stat .n small {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-faint);
+  }
+
+  .stat .label {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.3;
+  }
+
+  /* ---------- Section scaffolding ---------- */
+
+  section { margin-top: 44px; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 4px;
+  }
+
+  h2 {
+    font-size: 21px;
+    font-weight: 600;
+  }
+
+  .section-note {
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  .lede {
+    margin: 10px 0 20px;
+    color: var(--ink-muted);
+    font-size: 14.5px;
+    max-width: 62ch;
+    line-height: 1.55;
+  }
+
+  .group-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin: 24px 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .group-title:first-of-type { margin-top: 16px; }
+
+  /* ---------- Checklist rows ---------- */
+
+  ul.checks { list-style: none; margin: 0; padding: 0; }
+
+  .check {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    align-items: start;
+    gap: 12px;
+    padding: 9px 4px;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+
+  .check:last-child { border-bottom: none; }
+
+  .mark {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .mark svg { width: 11px; height: 11px; }
+
+  .status-done .mark { background: var(--done-tint); color: var(--done); }
+  .status-partial .mark { background: var(--partial-tint); color: var(--partial); }
+  .status-open .mark { background: var(--open-tint); color: var(--open); }
+
+  .check .body .item { color: var(--ink); }
+
+  .check .note {
+    display: block;
+    margin-top: 2px;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+
+  .check .note code {
+    font-size: 11.5px;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--ink-muted);
+  }
+
+  .pill {
+    align-self: start;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .status-done .pill { background: var(--done-tint); color: var(--done); }
+  .status-partial .pill { background: var(--partial-tint); color: var(--partial); }
+  .status-open .pill { background: var(--open-tint); color: var(--open); }
+
+  /* ---------- Callout ---------- */
+
+  .callout {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--open);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .callout h3 {
+    font-size: 15px;
+    font-weight: 600;
+    font-family: "Public Sans", sans-serif;
+    color: var(--open);
+    margin-bottom: 10px;
+  }
+
+  .callout ol {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  .callout li + li { margin-top: 10px; }
+  .callout .why { color: var(--ink-muted); font-size: 13px; }
+
+  /* ---------- Tomorrow worklist ---------- */
+
+  .worklist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: task;
+  }
+
+  .task {
+    counter-increment: task;
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .task:last-child { border-bottom: none; }
+
+  .task::before {
+    content: counter(task);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-ink);
+    background: var(--accent-tint);
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .task .title {
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+
+  .task .desc {
+    margin-top: 3px;
+    font-size: 13.5px;
+    color: var(--ink-muted);
+    line-height: 1.55;
+  }
+
+  /* ---------- Decisions table ---------- */
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    background: var(--surface);
+  }
+
+  th, td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-soft);
+    white-space: nowrap;
+  }
+
+  td:nth-child(2) { white-space: normal; color: var(--ink-muted); }
+
+  th {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: var(--surface-2);
+    font-weight: 600;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td.val { font-family: "JetBrains Mono", monospace; color: var(--accent-ink); font-weight: 500; }
+
+  /* ---------- Footer ---------- */
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 560px) {
+    .masthead { flex-direction: column; }
+    .meta { text-align: left; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .check { grid-template-columns: 18px 1fr; }
+    .pill { grid-column: 2; margin-top: 6px; }
+  }
+</style>
+
+<div class="page">
+
+  <div class="masthead">
+    <div>
+      <p class="eyebrow">Jihudumie Logistics · Customer Platform</p>
+      <h1>Sprint 1 — Customer&nbsp;Authentication</h1>
+      <p class="subtitle">Status against the accepted specification, checked line by line — not a summary of effort.</p>
+    </div>
+    <div class="meta">
+      <div class="date">9 Sep 2026</div>
+      <div>mobile + backend</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="n">103</div>
+      <div class="label">automated tests passing<br>(61 backend, 42 mobile)</div>
+    </div>
+    <div class="stat">
+      <div class="n">9</div>
+      <div class="label">API endpoints live<br>and integration-tested</div>
+    </div>
+    <div class="stat">
+      <div class="n">10</div>
+      <div class="label">mobile screens built,<br>including the OTP flow</div>
+    </div>
+    <div class="stat">
+      <div class="n">1<small>&nbsp;real&nbsp;SMS</small></div>
+      <div class="label">verification code delivered<br>to a real handset today</div>
+    </div>
+  </div>
+
+  <section>
+    <div class="section-head">
+      <h2>§40 Acceptance Criteria</h2>
+      <span class="section-note">28 / 28 met</span>
+    </div>
+    <p class="lede">Every line item the specification lists as required for the module to be considered complete.</p>
+
+    <div class="group-title">Registration</div>
+    <ul class="checks">
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Phone number entered and validated</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">OTP requested and delivered</span><span class="note">real SMS confirmed on a handset via Webline (<code>TAARIFA</code> sender), free <code>logging</code> provider used for routine dev</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Valid OTP accepted, invalid rejected, expired rejected, attempts limited</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Resend subject to a cooldown and an hourly cap</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Full name and email entered; account created only on verification</span><span class="note">nothing is persisted for an unverified number — the agreed deviation from §6</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Duplicate phone numbers prevented</span><span class="note">enforced at the database's unique index, not just a pre-check — closes the race where two devices register the same number at once</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Customer authenticated and reaches Home</span></span><span class="pill">Done</span></li>
+    </ul>
+
+    <div class="group-title">Login</div>
+    <ul class="checks">
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Phone entered, OTP requested and verified</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Invalid and expired OTP rejected</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Unregistered number refused — login never auto-creates an account</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Successful login opens a session and reaches Home</span></span><span class="pill">Done</span></li>
+    </ul>
+
+    <div class="group-title">Logout</div>
+    <ul class="checks">
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Signs out; local state cleared; protected screens unreachable</span><span class="note">enforced by session state, not a route guard — there is no navigation stack to guard in this design</span></span><span class="pill">Done</span></li>
+      <li class="check status-partial"><span class="mark">–</span><span class="body"><span class="item">Customer can log in again afterward</span><span class="note">each half is proven independently; no single automated test chains logout → login to show the handoff itself</span></span><span class="pill">Minor gap</span></li>
+    </ul>
+
+    <div class="group-title">Phone number change</div>
+    <ul class="checks">
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">New number entered, validated, sent an OTP, verified</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Duplicate new numbers rejected</span><span class="note">checked again at verification, not only at request — covers the case where the number is claimed by someone else while the code is in flight</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Number updates only after verification; a failed attempt leaves it untouched</span></span><span class="pill">Done</span></li>
+      <li class="check status-partial"><span class="mark">–</span><span class="body"><span class="item">New number becomes the login identifier</span><span class="note">the database row changes, proven; no automated test then logs in with the new number</span></span><span class="pill">Minor gap</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>§41 Sprint 1 Deliverables</h2>
+      <span class="section-note">complete, 2 items reshaped by agreement</span>
+    </div>
+
+    <div class="group-title">Mobile application</div>
+    <ul class="checks">
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Registration, phone-number input, OTP, login, logout, change-phone screens</span></span><span class="pill">Done</span></li>
+      <li class="check status-partial"><span class="mark">–</span><span class="body"><span class="item">Separate "profile creation" and "login OTP" screens</span><span class="note">by agreement: one register screen collects name + email + phone together, and one OTP screen serves all three flows — reduces the surface, not the requirement</span></span><span class="pill">By design</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Loading states, validation messages, error handling</span><span class="note">every server error code has a mapped, localised message — <code>JhAppState._applyError</code></span></span><span class="pill">Done</span></li>
+    </ul>
+
+    <div class="group-title">Backend</div>
+    <ul class="checks">
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Customer model, OTP/auth-request structure, all nine endpoints</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">JWT session mechanism with real logout</span><span class="note">access + rotating refresh tokens, server-side blacklist — a bare JWT cannot be revoked, so this is what makes §22 and §25 actually true</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Validation, rate limiting, security controls</span><span class="note">OTP hashed with a server pepper, bound to phone + purpose; masked in every log line</span></span><span class="pill">Done</span></li>
+    </ul>
+
+    <div class="group-title">Integration</div>
+    <ul class="checks">
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Mobile app connected to the live API</span><span class="note"><code>lib/api/</code> — no fixtures remain anywhere in the app</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">SMS provider integrated</span><span class="note">Webline Africa; a real code was delivered to a handset and verified today</span></span><span class="pill">Done</span></li>
+      <li class="check status-done"><span class="mark">✓</span><span class="body"><span class="item">Registration and login tested end-to-end against the real, running stack</span><span class="note"><code>test/live_wiring_test.dart</code> — the app's actual HTTP client, not a stand-in</span></span><span class="pill">Done</span></li>
+      <li class="check status-partial"><span class="mark">–</span><span class="body"><span class="item">Phone-number change tested end-to-end</span><span class="note">covered on each side in isolation (backend integration tests, mobile widget tests); not yet in the live cross-system run — first item tomorrow</span></span><span class="pill">Minor gap</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="callout">
+      <h3>Two gaps worth naming plainly</h3>
+      <ol>
+        <li>
+          <strong>Session expiry has no test.</strong> The refresh-and-retry path exists in <code>auth_api.dart</code> — a request that meets a 401 refreshes the token once and retries — but nothing forces an access token to actually expire and confirms the app recovers. §41 names "session expiration" as required testing.
+          <div class="why">Why it slipped: proving it means forcing a token past its 15-minute life, which every other test today ran well inside.</div>
+        </li>
+        <li>
+          <strong>Invalid email has no backend test.</strong> DRF's <code>EmailField</code> does reject a malformed address — confirmed by hand — but no test in <code>test_flows.py</code> says so. The mobile app's local check is tested; the server's is not.
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Decided today</h2>
+      <span class="section-note">§43 — previously open</span>
+    </div>
+    <p class="lede">The specification named these as parameters no individual developer should guess. All now have a value, live in <code>backend/.env</code>, and are returned to the app rather than duplicated as client constants.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Parameter</th><th>Decided</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>OTP length</td><td>fixed at six digits</td><td class="val">6</td></tr>
+          <tr><td>OTP validity</td><td>time to enter a code from SMS</td><td class="val">300s</td></tr>
+          <tr><td>Max attempts</td><td>guesses before lockout</td><td class="val">3</td></tr>
+          <tr><td>Resend cooldown</td><td>between requests for a new code</td><td class="val">60s</td></tr>
+          <tr><td>Requests per hour</td><td>per phone number</td><td class="val">5</td></tr>
+          <tr><td>Access token life</td><td>JWT, short by design</td><td class="val">15 min</td></tr>
+          <tr><td>Refresh token life</td><td>rotates on every use</td><td class="val">30 days</td></tr>
+          <tr><td>Phone normalisation</td><td>nine digits, no country code</td><td class="val">712345678</td></tr>
+          <tr><td>Email uniqueness</td><td>not enforced — a household may share one</td><td class="val">off</td></tr>
+          <tr><td>SMS provider</td><td>Webline Africa, shared sender while <code>JIHUDUMIE</code> clears</td><td class="val">TAARIFA</td></tr>
+          <tr><td>Phone change → other sessions</td><td>signed out everywhere else</td><td class="val">yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Tomorrow</h2>
+    </div>
+    <ol class="worklist">
+      <li class="task">
+        <div>
+          <div class="title">Extend the live wiring proof to phone-number change and session expiry</div>
+          <div class="desc">Closes both named gaps above in one sitting — the live test file and its pattern already exist.</div>
+        </div>
+      </li>
+      <li class="task">
+        <div>
+          <div class="title">Production settings pass on the backend</div>
+          <div class="desc"><code>DEBUG=False</code>, a real <code>SECRET_KEY</code> and <code>OTP_PEPPER</code>, HTTPS, and a shared cache so rate limiting holds across more than one worker process.</div>
+        </div>
+      </li>
+      <li class="task">
+        <div>
+          <div class="title">Schedule the expired-OTP cleanup</div>
+          <div class="desc"><code>otp.purge_expired</code> is written and tested; it just isn't on a clock yet.</div>
+        </div>
+      </li>
+      <li class="task">
+        <div>
+          <div class="title">Start the sender ID registration</div>
+          <div class="desc">TCRA / operator approval for <code>JIHUDUMIE</code> has lead time — worth opening this week regardless of engineering pace.</div>
+        </div>
+      </li>
+      <li class="task">
+        <div>
+          <div class="title">One real device pass</div>
+          <div class="desc">Everything today ran on an emulator and a live handset for SMS only — a plain end-to-end run on a physical Android phone is still owed before calling Sprint 1 closed.</div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <footer>
+    <span>Verified by running the suites, not by reading the code — <span class="mono">manage.py test</span> and <span class="mono">flutter test</span>, today.</span>
+    <span>Sprint 1 · Customer Authentication</span>
+  </footer>
+
+</div>

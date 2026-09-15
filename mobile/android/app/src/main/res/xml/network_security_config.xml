@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sprint 1 testing only. The dev backend is plain HTTP on the developer's
+  machine (http://LAN-IP:8000) and Android 9+ blocks cleartext by default.
+  Production uses an HTTPS API, so a store build should drop the
+  networkSecurityConfig attribute from AndroidManifest.xml.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

@@ -1,0 +1,9 @@
+# Workspace-level ignores. Each project carries its own .gitignore for
+# stack-specific artefacts (frontend/.gitignore, backend/.gitignore).
+
+.idea/
+*.iml
+.vscode/
+
+.DS_Store
+Thumbs.db

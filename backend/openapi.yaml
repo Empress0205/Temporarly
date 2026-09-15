@@ -1,0 +1,1402 @@
+openapi: 3.0.3
+info:
+  title: Jihudumie Customer Authentication API
+  version: 1.0.0
+  description: Sprint 1 authentication module.
+paths:
+  /api/auth/login/request-otp:
+    post:
+      operationId: auth_login_request_otp_create
+      description: Sends a code to a registered number. Fails with PHONE_NOT_REGISTERED
+        (404) for an unknown number -- login never creates an account.
+      summary: Start login
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Phone'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Phone'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Phone'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/auth/login/verify-otp:
+    post:
+      operationId: auth_login_verify_otp_create
+      summary: Verify login
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/auth/logout:
+    post:
+      operationId: auth_logout_create
+      description: Revokes the refresh token. Idempotent -- signing out twice, or
+        with an already-expired token, still returns 204. The access token stays valid
+        until it expires, which is why its lifetime is short.
+      summary: Sign out
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Logout'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/auth/me:
+    get:
+      operationId: auth_me_retrieve
+      description: Identity is taken from the access token, never from the request.
+      summary: The authenticated customer
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/auth/register/request-otp:
+    post:
+      operationId: auth_register_request_otp_create
+      description: Sends a verification code to an unregistered number. Nothing is
+        persisted about the person until the code is verified. Fails with PHONE_ALREADY_REGISTERED
+        (409) if the number already has an account, so no SMS is spent.
+      summary: Start registration
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Phone'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Phone'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Phone'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/auth/register/verify-otp:
+    post:
+      operationId: auth_register_verify_otp_create
+      description: Creates the customer only on a correct code. OTP_INCORRECT carries
+        `attempts_remaining`; after the limit the request locks with OTP_ATTEMPTS_EXCEEDED
+        until a new code is requested.
+      summary: Verify registration and create the account
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterVerify'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterVerify'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterVerify'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/auth/resend-otp:
+    post:
+      operationId: auth_resend_otp_create
+      description: Issues a fresh code and invalidates the previous one. Refused with
+        OTP_RESEND_TOO_SOON (429) while the cooldown is running; `details.retry_after_seconds`
+        says how long is left.
+      summary: Resend the verification code
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Resend'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Resend'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Resend'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/auth/token/refresh:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/customer/phone/request-change:
+    post:
+      operationId: customer_phone_request_change_create
+      description: Sends a code to the new number. Refused with PHONE_SAME_AS_CURRENT
+        or PHONE_BELONGS_TO_OTHER (both 409). The account is unchanged.
+      summary: Start a phone number change
+      tags:
+      - customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Phone'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Phone'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Phone'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/customer/phone/verify-change:
+    post:
+      operationId: customer_phone_verify_change_create
+      description: Moves the account to the new number. Ownership is re-checked here,
+        not only at request time, because the number can be claimed while the code
+        is in flight. Pass the current `refresh` token to keep this device signed
+        in when other devices are revoked.
+      summary: Verify and apply the new phone number
+      tags:
+      - customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/orders:
+    get:
+      operationId: orders_list
+      description: Optionally filtered by `?bucket=active|completed|cancelled`.
+      summary: List the signed-in customer's orders
+      tags:
+      - orders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+    post:
+      operationId: orders_create
+      description: Price is computed server-side from the pickup/drop-off distance
+        -- never trusted from the client. `multipart/form-data` when a package photo
+        is attached, otherwise plain JSON.
+      summary: Create an order
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/orders/{order_id}:
+    get:
+      operationId: orders_retrieve
+      summary: Order detail
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - orders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/orders/{order_id}/cancel:
+    post:
+      operationId: orders_cancel_create
+      description: Only while the courier has not yet picked the package up -- ORDER_CANCEL_NOT_ALLOWED
+        (409) afterwards.
+      summary: Cancel an order
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - orders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+  /api/orders/{order_id}/rate:
+    post:
+      operationId: orders_rate_create
+      description: ORDER_NOT_COMPLETED (409) for any order that isn't COMPLETED yet.
+      summary: Rate a completed delivery
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRating'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderRating'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderRating'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: ''
+components:
+  schemas:
+    AccountStatusEnum:
+      enum:
+      - ACTIVE
+      - SUSPENDED
+      - DELETED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `SUSPENDED` - Suspended
+        * `DELETED` - Deleted
+    Customer:
+      type: object
+      description: The authenticated customer, as the app renders it.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        phone_number:
+          type: string
+          readOnly: true
+        phone_number_display:
+          type: string
+          readOnly: true
+        phone_verified:
+          type: boolean
+          readOnly: true
+        account_status:
+          allOf:
+          - $ref: '#/components/schemas/AccountStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - account_status
+      - created_at
+      - email
+      - full_name
+      - id
+      - phone_number
+      - phone_number_display
+      - phone_verified
+    Driver:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        vehicle:
+          allOf:
+          - $ref: '#/components/schemas/VehicleEnum'
+          readOnly: true
+        plate:
+          type: string
+          readOnly: true
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+      required:
+      - id
+      - name
+      - plate
+      - rating
+      - vehicle
+    ErrorBody:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Machine-readable failure code. Clients branch on this, never
+            on `message`. See ErrorCode in authentication/errors.py.
+        message:
+          type: string
+          description: Human-readable text for logs and debugging. Not for display.
+        details:
+          type: object
+          additionalProperties: {}
+          description: Extra context. `attempts_remaining` on OTP_INCORRECT, `retry_after_seconds`
+            on rate limits, `field` on validation.
+      required:
+      - code
+      - details
+      - message
+    ErrorEnvelope:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorBody'
+      required:
+      - error
+    Logout:
+      type: object
+      properties:
+        refresh:
+          type: string
+      required:
+      - refresh
+    Order:
+      type: object
+      description: The shape the client renders an order in -- list and detail alike.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        order_number:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        stage:
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          readOnly: true
+        vehicle:
+          allOf:
+          - $ref: '#/components/schemas/VehicleEnum'
+          readOnly: true
+        price_tsh:
+          type: integer
+          readOnly: true
+        paid:
+          type: boolean
+          readOnly: true
+        payment_method:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethodEnum'
+          readOnly: true
+        driver:
+          allOf:
+          - $ref: '#/components/schemas/Driver'
+          readOnly: true
+        pickup_address:
+          type: string
+          readOnly: true
+        pickup_landmark:
+          type: string
+          readOnly: true
+        pickup_instructions:
+          type: string
+          readOnly: true
+        pickup_lat:
+          type: number
+          format: double
+          readOnly: true
+        pickup_lng:
+          type: number
+          format: double
+          readOnly: true
+        dropoff_address:
+          type: string
+          readOnly: true
+        dropoff_landmark:
+          type: string
+          readOnly: true
+        dropoff_lat:
+          type: number
+          format: double
+          readOnly: true
+        dropoff_lng:
+          type: number
+          format: double
+          readOnly: true
+        delivery_instructions:
+          type: string
+          readOnly: true
+        recipient_name:
+          type: string
+          readOnly: true
+        recipient_phone:
+          type: string
+          readOnly: true
+        package_type:
+          allOf:
+          - $ref: '#/components/schemas/PackageTypeEnum'
+          readOnly: true
+        package_size:
+          allOf:
+          - $ref: '#/components/schemas/PackageSizeEnum'
+          readOnly: true
+        quantity:
+          type: integer
+          readOnly: true
+        package_description:
+          type: string
+          readOnly: true
+        handling_instructions:
+          type: string
+          readOnly: true
+        photo_url:
+          type: string
+          nullable: true
+          readOnly: true
+        distance_km:
+          type: number
+          format: double
+          readOnly: true
+        my_rating:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - delivery_instructions
+      - distance_km
+      - driver
+      - dropoff_address
+      - dropoff_landmark
+      - dropoff_lat
+      - dropoff_lng
+      - handling_instructions
+      - id
+      - my_rating
+      - order_number
+      - package_description
+      - package_size
+      - package_type
+      - paid
+      - payment_method
+      - photo_url
+      - pickup_address
+      - pickup_instructions
+      - pickup_landmark
+      - pickup_lat
+      - pickup_lng
+      - price_tsh
+      - quantity
+      - recipient_name
+      - recipient_phone
+      - stage
+      - status
+      - vehicle
+    OrderCreate:
+      type: object
+      description: Mirrors `JhOrderDraft` on the mobile side field-for-field.
+      properties:
+        vehicle:
+          $ref: '#/components/schemas/VehicleEnum'
+        payment_method:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethodEnum'
+          default: PAY_AFTER_DELIVERY
+        pickup_address:
+          type: string
+          maxLength: 255
+        pickup_landmark:
+          type: string
+          default: ''
+          maxLength: 255
+        pickup_instructions:
+          type: string
+          default: ''
+          maxLength: 500
+        pickup_lat:
+          type: number
+          format: double
+        pickup_lng:
+          type: number
+          format: double
+        dropoff_address:
+          type: string
+          maxLength: 255
+        dropoff_landmark:
+          type: string
+          default: ''
+          maxLength: 255
+        dropoff_lat:
+          type: number
+          format: double
+        dropoff_lng:
+          type: number
+          format: double
+        delivery_instructions:
+          type: string
+          default: ''
+          maxLength: 500
+        recipient_name:
+          type: string
+          maxLength: 150
+        recipient_phone:
+          type: string
+          maxLength: 20
+        package_type:
+          $ref: '#/components/schemas/PackageTypeEnum'
+        package_size:
+          $ref: '#/components/schemas/PackageSizeEnum'
+        quantity:
+          type: integer
+          maximum: 20
+          minimum: 1
+          default: 1
+        package_description:
+          type: string
+          default: ''
+          maxLength: 500
+        handling_instructions:
+          type: string
+          default: ''
+          maxLength: 500
+        package_photo:
+          type: string
+          format: uri
+          nullable: true
+        declaration_accepted:
+          type: boolean
+          default: false
+      required:
+      - dropoff_address
+      - dropoff_lat
+      - dropoff_lng
+      - package_size
+      - package_type
+      - pickup_address
+      - pickup_lat
+      - pickup_lng
+      - recipient_name
+      - recipient_phone
+      - vehicle
+    OrderRating:
+      type: object
+      properties:
+        stars:
+          type: integer
+          maximum: 5
+          minimum: 1
+      required:
+      - stars
+    OtpChallenge:
+      type: object
+      description: |-
+        What the client needs to drive its countdown and resend button.
+
+        The timings come from the server rather than being duplicated as constants
+        in the app (section 43), so changing policy does not require a release.
+      properties:
+        expires_in:
+          type: integer
+        resend_available_in:
+          type: integer
+        otp_length:
+          type: integer
+        max_attempts:
+          type: integer
+      required:
+      - expires_in
+      - max_attempts
+      - otp_length
+      - resend_available_in
+    OtpCode:
+      type: object
+      description: Any spelling is accepted; `services.clean_phone` normalises it.
+      properties:
+        phone_number:
+          type: string
+          maxLength: 20
+        code:
+          type: string
+          maxLength: 10
+          minLength: 4
+      required:
+      - code
+      - phone_number
+    PackageSizeEnum:
+      enum:
+      - SMALL
+      - MEDIUM
+      - LARGE
+      type: string
+      description: |-
+        * `SMALL` - Small
+        * `MEDIUM` - Medium
+        * `LARGE` - Large
+    PackageTypeEnum:
+      enum:
+      - DOCUMENTS
+      - CLOTHES
+      - FOOD
+      - ELECTRONICS
+      - HOUSEHOLD
+      - OTHER
+      type: string
+      description: |-
+        * `DOCUMENTS` - Documents
+        * `CLOTHES` - Clothes
+        * `FOOD` - Food
+        * `ELECTRONICS` - Electronics
+        * `HOUSEHOLD` - Household item
+        * `OTHER` - Other
+    PaymentMethodEnum:
+      enum:
+      - PAY_AFTER_DELIVERY
+      type: string
+      description: '* `PAY_AFTER_DELIVERY` - Pay after delivery'
+    Phone:
+      type: object
+      description: Any spelling is accepted; `services.clean_phone` normalises it.
+      properties:
+        phone_number:
+          type: string
+          maxLength: 20
+      required:
+      - phone_number
+    PurposeEnum:
+      enum:
+      - REGISTRATION
+      - LOGIN
+      - PHONE_CHANGE
+      type: string
+      description: |-
+        * `REGISTRATION` - Registration
+        * `LOGIN` - Login
+        * `PHONE_CHANGE` - Phone change
+    RegisterVerify:
+      type: object
+      description: Any spelling is accepted; `services.clean_phone` normalises it.
+      properties:
+        phone_number:
+          type: string
+          maxLength: 20
+        code:
+          type: string
+          maxLength: 10
+          minLength: 4
+        full_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+      required:
+      - code
+      - email
+      - full_name
+      - phone_number
+    Resend:
+      type: object
+      description: Any spelling is accepted; `services.clean_phone` normalises it.
+      properties:
+        phone_number:
+          type: string
+          maxLength: 20
+        purpose:
+          $ref: '#/components/schemas/PurposeEnum'
+      required:
+      - phone_number
+      - purpose
+    Session:
+      type: object
+      description: 'Returned by both verify endpoints: who signed in, and their tokens.'
+      properties:
+        customer:
+          $ref: '#/components/schemas/Customer'
+        tokens:
+          $ref: '#/components/schemas/TokenPair'
+      required:
+      - customer
+      - tokens
+    StageEnum:
+      enum:
+      - REQUEST_CREATED
+      - DRIVER_ASSIGNED
+      - DRIVER_ARRIVING
+      - PICKED_UP
+      - DELIVERED
+      type: string
+      description: |-
+        * `REQUEST_CREATED` - Request created
+        * `DRIVER_ASSIGNED` - Driver assigned
+        * `DRIVER_ARRIVING` - Driver arriving
+        * `PICKED_UP` - Picked up
+        * `DELIVERED` - Delivered
+    StatusEnum:
+      enum:
+      - IN_TRANSIT
+      - COMPLETED
+      - CANCELLED
+      type: string
+      description: |-
+        * `IN_TRANSIT` - In transit
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+    TokenPair:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+        access_expires_in:
+          type: integer
+          description: Seconds until the access token expires.
+      required:
+      - access
+      - access_expires_in
+      - refresh
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    VehicleEnum:
+      enum:
+      - MOTORCYCLE
+      - CAR
+      - VAN
+      type: string
+      description: |-
+        * `MOTORCYCLE` - Motorcycle
+        * `CAR` - Car
+        * `VAN` - Van
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,23 @@
+# Postgres for local development.
+#
+# Start Docker Desktop, then: docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: jihudumie-db
+    environment:
+      POSTGRES_DB: jihudumie
+      POSTGRES_USER: jihudumie
+      POSTGRES_PASSWORD: jihudumie_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - jihudumie_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jihudumie -d jihudumie"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  jihudumie_pgdata:
