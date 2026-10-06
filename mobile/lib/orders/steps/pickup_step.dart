@@ -6,7 +6,6 @@ import 'package:latlong2/latlong.dart';
 import '../../state/app_state.dart';
 import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/jh_buttons.dart';
 import '../../widgets/jh_fields.dart';
 import '../../widgets/jh_scope.dart';
 import '../../widgets/jh_spinner.dart';
@@ -38,16 +37,14 @@ JhWizardScaffold _scaffold({
   required List<Widget> body,
   required Widget footer,
   String? title,
-  String? subtitle,
 }) {
   final t = state.t;
   return JhWizardScaffold(
     step: 1,
     stepCount: JhAppState.orderStepCount,
-    crumb: '${t.stepTitleRoute} · ${t.stepTitlePickup}',
+    crumb: t.stepTitlePickup,
     stepLabel: state.stepLabel(1),
     title: title ?? t.pickupTitle,
-    subtitle: subtitle,
     onBack: state.back,
     toastVisible: state.toast.isNotEmpty,
     body: body,
@@ -144,7 +141,6 @@ class _ManualFormState extends State<_ManualForm> {
 
     return _scaffold(
       state: state,
-      subtitle: t.pickupSub,
       body: [
         if (state.pickupError.isNotEmpty) ...[
           _Banner(
@@ -154,8 +150,13 @@ class _ManualFormState extends State<_ManualForm> {
           ),
           const SizedBox(height: 14),
         ],
+        // Search stays pinned at the top of the screen -- the reference this
+        // redesign matches drops it in favour of drag-to-set-pin, but typing
+        // an address and getting live results as you type is a hard
+        // requirement for this app, so it isn't going anywhere.
         JhFieldShell(
           borderColor: JhColors.cardBorder,
+          radius: JhRadii.card,
           child: Row(
             children: [
               const Icon(
@@ -181,11 +182,6 @@ class _ManualFormState extends State<_ManualForm> {
             ],
           ),
         ),
-        const SizedBox(height: 10),
-        _UseCurrentLocationRow(
-          label: t.pickupUseCurrentLocation,
-          onTap: state.pickupAllowLocation,
-        ),
         if (_results.isNotEmpty) ...[
           const SizedBox(height: 8),
           for (final place in _results)
@@ -197,21 +193,27 @@ class _ManualFormState extends State<_ManualForm> {
                 _search.clear();
               },
             ),
-        ] else if (draft.pickupAddress.trim().isEmpty &&
-            state.recentPlaces.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          JhRecentPlaces(
-            places: state.recentPlaces,
-            onSelect: state.pickupSelectPlace,
-            t: t,
-          ),
         ],
         const SizedBox(height: 14),
-        JhPickupMap(
-          live: state.liveMap,
-          center: center,
-          draggable: true,
-          onPinMoved: (p) => state.pickupPinMoved(p.latitude, p.longitude),
+        Stack(
+          children: [
+            JhPickupMap(
+              live: state.liveMap,
+              center: center,
+              draggable: true,
+              radius: JhRadii.card,
+              onPinMoved: (p) =>
+                  state.pickupPinMoved(p.latitude, p.longitude),
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: _LocationPill(
+                label: t.pickupUseCurrentLocation,
+                onTap: state.pickupAllowLocation,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
         Text(
@@ -222,29 +224,165 @@ class _ManualFormState extends State<_ManualForm> {
             color: JhColors.textFaint,
           ),
         ),
-        if (draft.pickupAddress.isNotEmpty) ...[
-          const SizedBox(height: 6),
-          Text(
-            draft.pickupAddress,
-            style: JhText.ui(size: 14.5, weight: FontWeight.w800),
+        const SizedBox(height: 20),
+        _SectionLabel(t.pickupAddressLabel),
+        const SizedBox(height: 6),
+        _UnderlineDisplay(
+          value: draft.pickupAddress.trim().isEmpty
+              ? '—'
+              : draft.pickupAddress,
+        ),
+        const SizedBox(height: 18),
+        _SectionLabel(t.pickupLandmarkLabel),
+        const SizedBox(height: 6),
+        _UnderlineField(
+          value: draft.pickupLandmark,
+          onChanged: state.setPickupLandmark,
+          placeholder: t.pickupLandmarkHint,
+        ),
+        if (state.recentPlaces.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          JhRecentPlaces(
+            places: state.recentPlaces,
+            onSelect: state.pickupSelectPlace,
+            t: t,
           ),
         ],
-        const SizedBox(height: 18),
-        ..._optionalFields(state, t),
       ],
-      footer: JhPrimaryButton(
+      footer: _ContinueCapsule(
         label: t.pickupConfirm,
-        onPressed: state.confirmPickup,
-        enabled: state.draft.hasPickup,
-        radius: JhRadii.control,
-        elevated: false,
+        onPressed: state.draft.hasPickup ? state.confirmPickup : null,
       ),
     );
   }
 }
 
-class _UseCurrentLocationRow extends StatelessWidget {
-  const _UseCurrentLocationRow({required this.label, required this.onTap});
+/// Full capsule, dark text on orange -- same local language as the other
+/// redesigned wizard steps.
+class _ContinueCapsule extends StatelessWidget {
+  const _ContinueCapsule({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  static const _height = 56.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onPressed != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      child: GestureDetector(
+        onTap: onPressed,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          height: _height,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: enabled ? JhColors.primary : JhColors.primaryDisabled,
+            borderRadius: BorderRadius.circular(_height / 2),
+          ),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: JhText.ui(size: 16, weight: FontWeight.w800, color: JhColors.ink),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The small uppercase, tracked-letter-spacing group header above the
+/// Address/Landmark fields -- same role as the Package step's section
+/// labels.
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    text.toUpperCase(),
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: JhText.ui(
+      size: 11,
+      weight: FontWeight.w800,
+      letterSpacing: 0.6,
+      color: JhColors.textFaint,
+    ),
+  );
+}
+
+/// Read-only text with the same bottom-rule look as [_UnderlineField] --
+/// the resolved address, which is set by search/GPS/the map, not typed here.
+class _UnderlineDisplay extends StatelessWidget {
+  const _UnderlineDisplay({required this.value});
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(bottom: 8),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: JhColors.cardBorder)),
+      ),
+      child: Text(
+        value,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: JhText.ui(size: 15, weight: FontWeight.w800),
+      ),
+    );
+  }
+}
+
+/// A borderless field with just a bottom rule -- the Landmark field.
+class _UnderlineField extends StatefulWidget {
+  const _UnderlineField({
+    required this.value,
+    required this.onChanged,
+    required this.placeholder,
+  });
+
+  final String value;
+  final ValueChanged<String> onChanged;
+  final String placeholder;
+
+  @override
+  State<_UnderlineField> createState() => _UnderlineFieldState();
+}
+
+class _UnderlineFieldState extends State<_UnderlineField>
+    with JhControllerSync<_UnderlineField> {
+  @override
+  Widget build(BuildContext context) {
+    syncController(widget.value);
+    return Container(
+      padding: const EdgeInsets.only(bottom: 8),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: JhColors.cardBorder)),
+      ),
+      child: EditableTextField(
+        controller: controller,
+        onChanged: widget.onChanged,
+        placeholder: widget.placeholder,
+        style: JhText.ui(size: 15, weight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+/// A floating white pill over the map's top-right corner -- matches the
+/// reference's map treatment, replacing the tinted row that used to sit
+/// above the map.
+class _LocationPill extends StatelessWidget {
+  const _LocationPill({required this.label, required this.onTap});
 
   final String label;
   final VoidCallback onTap;
@@ -258,27 +396,24 @@ class _UseCurrentLocationRow extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
           decoration: BoxDecoration(
-            color: JhColors.primaryTint,
-            borderRadius: BorderRadius.circular(JhRadii.control),
+            color: JhColors.surface,
+            borderRadius: BorderRadius.circular(JhRadii.pill),
+            boxShadow: JhShadows.field,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
                 JhIcons.myLocation,
-                size: 16,
+                size: 14,
                 color: JhColors.primaryText,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Text(
                 label,
-                style: JhText.ui(
-                  size: 13,
-                  weight: FontWeight.w700,
-                  color: JhColors.primaryText,
-                ),
+                style: JhText.ui(size: 12, weight: FontWeight.w700),
               ),
             ],
           ),
@@ -287,29 +422,6 @@ class _UseCurrentLocationRow extends StatelessWidget {
     );
   }
 }
-
-List<Widget> _optionalFields(JhAppState state, dynamic t) => [
-  JhLabeledField(
-    label: '${t.pickupLandmarkLabel} (${t.optionalSuffix})',
-    child: JhTextField(
-      value: state.draft.pickupLandmark,
-      onChanged: state.setPickupLandmark,
-      placeholder: t.pickupLandmarkHint,
-      hasError: false,
-    ),
-  ),
-  const SizedBox(height: 18),
-  JhLabeledField(
-    label: '${t.pickupInstructionsLabel} (${t.optionalSuffix})',
-    child: JhTextArea(
-      value: state.draft.pickupInstructions,
-      onChanged: state.setPickupInstructions,
-      placeholder: t.pickupInstructionsHint,
-      minLines: 1,
-      maxLines: 3,
-    ),
-  ),
-];
 
 enum _BannerTone { good, warn }
 
@@ -330,7 +442,7 @@ class _Banner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(JhRadii.control),
+        borderRadius: BorderRadius.circular(JhRadii.card),
       ),
       child: Row(
         children: [
@@ -364,8 +476,8 @@ class _ResultRow extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 6),
         decoration: BoxDecoration(
           color: JhColors.surface,
-          borderRadius: BorderRadius.circular(JhRadii.control),
-          boxShadow: JhShadows.card,
+          borderRadius: BorderRadius.circular(JhRadii.card),
+          border: Border.all(color: JhColors.cardBorder),
         ),
         child: Row(
           children: [

@@ -21,8 +21,10 @@ class JhTabBar extends StatelessWidget {
   final JhStrings strings;
   final ValueChanged<JhTab> onSelect;
 
-  /// Drawn height, before the safe-area allowance is added.
-  static const double baseHeight = 62;
+  /// Total footprint reserved for the floating bar, including the gap above
+  /// it and the safe-area allowance below it -- screens pad their scroll
+  /// content by this so nothing sits underneath it.
+  static const double baseHeight = 78;
 
   static double heightOf(BuildContext context) =>
       baseHeight + bottomInsetOf(context);
@@ -36,40 +38,46 @@ class JhTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(8, 8, 8, bottomInsetOf(context)),
-      decoration: const BoxDecoration(
-        color: JhColors.surface,
-        border: Border(top: BorderSide(color: JhColors.cardBorder)),
-        boxShadow: JhShadows.tabBar,
-      ),
-      child: Row(
-        children: [
-          _Item(
-            icon: JhIcons.tabHome,
-            label: strings.home,
-            selected: current == JhTab.home,
-            onTap: () => onSelect(JhTab.home),
-          ),
-          _Item(
-            icon: JhIcons.tabShop,
-            label: strings.shop,
-            selected: current == JhTab.shop,
-            onTap: () => onSelect(JhTab.shop),
-          ),
-          _Item(
-            icon: JhIcons.tabOrders,
-            label: strings.orders,
-            selected: current == JhTab.orders,
-            onTap: () => onSelect(JhTab.orders),
-          ),
-          _Item(
-            icon: JhIcons.tabAccount,
-            label: strings.account,
-            selected: current == JhTab.account,
-            onTap: () => onSelect(JhTab.account),
-          ),
-        ],
+    // A floating pill rather than an edge-to-edge bar: margin on every side
+    // lets the page's own background show around it instead of the bar
+    // owning the full width and pinning a hairline across the screen.
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 10, 16, bottomInsetOf(context)),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: JhColors.surface,
+          borderRadius: BorderRadius.circular(JhRadii.sheet),
+          boxShadow: JhShadows.tabBar,
+        ),
+        child: Row(
+          children: [
+            _Item(
+              icon: JhIcons.tabHome,
+              label: strings.home,
+              selected: current == JhTab.home,
+              onTap: () => onSelect(JhTab.home),
+            ),
+            _Item(
+              icon: JhIcons.tabShop,
+              label: strings.shop,
+              selected: current == JhTab.shop,
+              onTap: () => onSelect(JhTab.shop),
+            ),
+            _Item(
+              icon: JhIcons.tabOrders,
+              label: strings.orders,
+              selected: current == JhTab.orders,
+              onTap: () => onSelect(JhTab.orders),
+            ),
+            _Item(
+              icon: JhIcons.tabAccount,
+              label: strings.account,
+              selected: current == JhTab.account,
+              onTap: () => onSelect(JhTab.account),
+            ),
+          ],
+        ),
       ),
     );
   }

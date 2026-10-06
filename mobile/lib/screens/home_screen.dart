@@ -9,8 +9,9 @@ import '../widgets/jh_scaffold.dart';
 import '../widgets/jh_scope.dart';
 import '../widgets/jh_tab_bar.dart';
 
-/// The authenticated landing: a green header carrying the greeting and search,
-/// then quick actions and recent orders on a light ground.
+/// The authenticated landing: a plain header carrying the greeting, then the
+/// Send a Package hero, quick actions and a first-delivery guide on a flat
+/// neutral ground.
 ///
 /// Only the greeting comes from the session. Everything below it is Sprint 2
 /// surface area, shown in its empty state rather than with invented data.
@@ -22,6 +23,9 @@ class JhHomeScreen extends StatelessWidget {
     final state = JhScope.of(context);
     final t = state.t;
 
+    // Flat -- no gradient. The header below has no colour of its own, so it
+    // reads as one continuous surface with the Scaffold's flat background
+    // rather than a separate card with a seam.
     return Column(
       children: [
         const _HomeHeader(),
@@ -48,9 +52,9 @@ class JhHomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   const _QuickActions(),
                   const SizedBox(height: 24),
-                  _SectionTitle(t.recentOrders),
+                  _SectionTitle(t.firstDeliveryTitle),
                   const SizedBox(height: 12),
-                  _EmptyOrders(t: t),
+                  _FirstDeliveryCard(t: t),
                 ],
               ),
             ),
@@ -72,7 +76,8 @@ class _HomeHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      color: JhColors.surface,
+      // No colour of its own -- the screen's radial glow shows straight
+      // through, so there's no seam where a separate header used to end.
       padding: EdgeInsets.fromLTRB(20, topInset + 14, 20, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,36 +90,25 @@ class _HomeHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _greetingFor(state.clock(), t),
+                      _greetingFor(state.clock(), t).toUpperCase(),
                       style: JhText.ui(
-                        size: 13,
-                        weight: FontWeight.w600,
+                        size: 11.5,
+                        weight: FontWeight.w800,
+                        letterSpacing: 0.7,
                         color: JhColors.textMuted,
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            state.greetingName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: JhText.ui(
-                              size: 20,
-                              weight: FontWeight.w800,
-                              letterSpacing: -0.4,
-                              color: JhColors.ink,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 7),
-                        const Icon(
-                          JhIcons.wave,
-                          size: 18,
-                          color: JhColors.accent,
-                        ),
-                      ],
+                    const SizedBox(height: 4),
+                    Text(
+                      state.greetingName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: JhText.ui(
+                        size: 27,
+                        weight: FontWeight.w800,
+                        letterSpacing: -0.6,
+                        color: JhColors.ink,
+                      ),
                     ),
                   ],
                 ),
@@ -129,8 +123,6 @@ class _HomeHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          _SearchField(hint: t.searchHint, onTap: () => state.showComingSoon(t.shop)),
         ],
       ),
     );
@@ -173,55 +165,7 @@ class _CircleButton extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: JhColors.cardBorder),
           ),
-          child: Icon(icon, size: 19, color: JhColors.primaryText),
-        ),
-      ),
-    );
-  }
-}
-
-/// Search is a Sprint 2 surface; the field is presentational and says so when
-/// tapped rather than opening a dead screen.
-class _SearchField extends StatelessWidget {
-  const _SearchField({required this.hint, required this.onTap});
-
-  final String hint;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: hint,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          height: 46,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: JhColors.surfaceMuted,
-            borderRadius: BorderRadius.circular(JhRadii.control),
-            border: Border.all(color: JhColors.cardBorder),
-          ),
-          child: Row(
-            children: [
-              const Icon(JhIcons.search, size: 19, color: JhColors.textMuted),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  hint,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: JhText.ui(
-                    size: 14,
-                    weight: FontWeight.w500,
-                    color: JhColors.textMuted,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          child: Icon(icon, size: 19, color: JhColors.textMuted),
         ),
       ),
     );
@@ -235,8 +179,13 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-    text,
-    style: JhText.ui(size: 15.5, weight: FontWeight.w800, letterSpacing: -0.3),
+    text.toUpperCase(),
+    style: JhText.ui(
+      size: 11.5,
+      weight: FontWeight.w800,
+      letterSpacing: 0.7,
+      color: JhColors.textFaint,
+    ),
   );
 }
 
@@ -248,14 +197,20 @@ class _QuickActions extends StatelessWidget {
     final state = JhScope.of(context);
     final t = state.t;
 
-    // One neutral treatment for all four -- colour-coding a row of equally
-    // weighted actions doesn't communicate anything real; it just adds more
-    // accents to a screen that already has one (the hero card above).
+    // Each icon in the colour it would naturally be, not one accent stamped
+    // on all four and not a flat grey either -- a delivery truck reads as
+    // amber, a pin as terracotta, a star as gold. Kept muted/warm so the row
+    // still sits quietly in the palette rather than turning into a rainbow.
     final actions = <_Action>[
-      _Action(JhIcons.shop, t.shop, t.shopSub),
-      _Action(JhIcons.track, t.track, t.trackSub),
-      _Action(JhIcons.nearby, t.nearby, t.nearbySub),
-      _Action(JhIcons.favourites, t.favourites, t.favouritesSub),
+      _Action(JhIcons.track, const Color(0xFFB5651D), t.track, t.trackSub),
+      _Action(JhIcons.shop, const Color(0xFFA9821C), t.shop, t.shopSub),
+      _Action(JhIcons.nearby, const Color(0xFFBD5B4C), t.nearby, t.nearbySub),
+      _Action(
+        JhIcons.favourites,
+        const Color(0xFFC49A2C),
+        t.favourites,
+        t.favouritesSub,
+      ),
     ];
 
     return Column(
@@ -283,9 +238,10 @@ class _QuickActions extends StatelessWidget {
 }
 
 class _Action {
-  const _Action(this.icon, this.title, this.subtitle);
+  const _Action(this.icon, this.color, this.title, this.subtitle);
 
   final IconData icon;
+  final Color color;
   final String title;
   final String subtitle;
 }
@@ -321,7 +277,7 @@ class _ActionCard extends StatelessWidget {
                   color: JhColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(action.icon, size: 19, color: JhColors.primaryText),
+                child: Icon(action.icon, size: 19, color: action.color),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -357,55 +313,97 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-class _EmptyOrders extends StatelessWidget {
-  const _EmptyOrders({required this.t});
+/// Replaces a generic "no orders yet" empty state with something a first-time
+/// sender can actually act on: what the three steps look like, and roughly
+/// what it costs by the cheapest vehicle -- an anchor, not a quote (nothing
+/// is chosen yet, so this can't be computed from a real route).
+class _FirstDeliveryCard extends StatelessWidget {
+  const _FirstDeliveryCard({required this.t});
 
   final JhStrings t;
 
   @override
   Widget build(BuildContext context) {
+    final steps = [t.homeStep1, t.homeStep2, t.homeStep3];
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 34),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: JhColors.surface,
         borderRadius: BorderRadius.circular(JhRadii.cardSmall),
         boxShadow: JhShadows.card,
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: JhColors.surfaceMuted,
-              shape: BoxShape.circle,
+          for (final (i, step) in steps.indexed) ...[
+            if (i > 0) const SizedBox(height: 14),
+            Row(
+              children: [
+                _StepBadge(number: i + 1, filled: i == 0),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    step,
+                    style: JhText.ui(size: 13.5, weight: FontWeight.w700),
+                  ),
+                ),
+              ],
             ),
-            child: const Icon(
-              JhIcons.parcel,
-              size: 24,
-              color: JhColors.primaryText,
-            ),
-          ),
+          ],
+          const SizedBox(height: 16),
+          const Divider(height: 1, color: JhColors.cardBorder),
           const SizedBox(height: 14),
-          Text(
-            t.noOrders,
-            textAlign: TextAlign.center,
-            style: JhText.ui(size: 14.5, weight: FontWeight.w800),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            t.noOrdersSub,
-            textAlign: TextAlign.center,
-            style: JhText.ui(
-              size: 12.5,
-              weight: FontWeight.w500,
-              color: JhColors.textMuted,
-              height: 1.4,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  t.typicalFareLabel.toUpperCase(),
+                  style: JhText.ui(
+                    size: 10.5,
+                    weight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                    color: JhColors.textFaint,
+                  ),
+                ),
+              ),
+              Text(
+                t.typicalFareValue,
+                style: JhText.ui(size: 14, weight: FontWeight.w800),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 }
+
+class _StepBadge extends StatelessWidget {
+  const _StepBadge({required this.number, required this.filled});
+
+  final int number;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 26,
+      height: 26,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: filled ? JhColors.primary : JhColors.surfaceMuted,
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        '$number',
+        style: JhText.ui(
+          size: 12,
+          weight: FontWeight.w800,
+          color: filled ? JhColors.onDark : JhColors.textMuted,
+        ),
+      ),
+    );
+  }
+}
+

@@ -115,21 +115,30 @@ class _Cell extends StatelessWidget {
         ? const Color(0x290F1A15) // rgba(15,26,21,.16)
         : JhColors.cardBorder;
 
+    // An empty, not-yet-reached cell shows a small dot rather than sitting
+    // fully blank -- reads as "six digits go here", not as an unstyled box.
+    final showDot = !filled && !active;
+
     return Container(
       height: 60,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: filled ? JhColors.surface : JhColors.cellEmpty,
-        borderRadius: BorderRadius.circular(JhRadii.control),
+        borderRadius: BorderRadius.circular(JhRadii.card),
         border: Border.all(color: border, width: 1.5),
       ),
-      child: Text(
-        char,
-        style: JhText.mono(
-          size: 24,
-          color: filled ? JhColors.ink : JhColors.inkFaint,
-        ),
-      ),
+      child: showDot
+          ? const Text(
+              '•',
+              style: TextStyle(fontSize: 22, color: JhColors.textFaint),
+            )
+          : Text(
+              char,
+              style: JhText.mono(
+                size: 24,
+                color: filled ? JhColors.ink : JhColors.inkFaint,
+              ),
+            ),
     );
   }
 }

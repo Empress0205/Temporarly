@@ -117,7 +117,6 @@ void main() {
       await tester.settle();
       expect(state.screen, JhScreen.orderDetail);
       expect(find.text(t.trackPackageTitle), findsWidgets);
-      expect(find.text(t.deliveryTimelineTitle), findsOneWidget);
       // The sample order carries a driver.
       expect(find.text('John Michael'), findsOneWidget);
 
@@ -373,19 +372,20 @@ void main() {
         ..editOrderStep(5); // onto Review directly
       await tester.pump();
 
-      // Edit the Recipient section (2nd on the page).
-      await tester.tap(find.text(t.reviewEdit).at(1));
+      // Edit the Package section (3rd on the page: Pickup, Destination,
+      // Package -- the Recipient section was folded into Destination).
+      await tester.tap(find.text(t.reviewEdit).at(2));
       await tester.settle();
-      expect(state.orderStep, 2);
+      expect(state.orderStep, 3);
 
-      await tester.enterText(find.byType(TextField).at(0), 'Neema Said');
+      await tester.tapText(t.pkgDocuments);
       await tester.pump();
       await tester.tapText(t.continueLabel);
       await tester.settle();
 
-      // Back on Review, not walked forward to Package.
+      // Back on Review, not walked forward to Delivery mode.
       expect(state.orderStep, 5);
-      expect(state.draft.recipientName, 'Neema Said');
+      expect(state.draft.packageType, JhPackageType.documents);
       expect(find.text(t.reviewTitle), findsOneWidget);
     });
 

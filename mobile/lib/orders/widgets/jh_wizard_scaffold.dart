@@ -96,18 +96,20 @@ class _Header extends StatelessWidget {
             TextSpan(
               children: [
                 TextSpan(
-                  text: crumb,
+                  text: crumb.toUpperCase(),
                   style: JhText.ui(
-                    size: 12,
+                    size: 11.5,
                     weight: FontWeight.w800,
+                    letterSpacing: 0.6,
                     color: JhColors.primaryText,
                   ),
                 ),
                 TextSpan(
-                  text: '  ·  $stepLabel',
+                  text: '  ·  ${stepLabel.toUpperCase()}',
                   style: JhText.ui(
-                    size: 12,
-                    weight: FontWeight.w600,
+                    size: 11.5,
+                    weight: FontWeight.w700,
+                    letterSpacing: 0.6,
                     color: JhColors.textMuted,
                   ),
                 ),

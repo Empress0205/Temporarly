@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import '../../state/app_state.dart';
 import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/jh_buttons.dart';
 import '../../widgets/jh_scope.dart';
 import '../money.dart';
 import '../order_models.dart';
@@ -27,7 +26,6 @@ class JhDeliveryModeStep extends StatelessWidget {
       crumb: t.stepTitleDelivery,
       stepLabel: state.stepLabel(4),
       title: t.deliveryModeTitle,
-      subtitle: t.deliveryModeSub,
       onBack: state.back,
       toastVisible: state.toast.isNotEmpty,
       body: [
@@ -60,12 +58,9 @@ class JhDeliveryModeStep extends StatelessWidget {
           ),
         ],
       ],
-      footer: JhPrimaryButton(
+      footer: _ContinueCapsule(
         label: t.continueLabel,
-        onPressed: state.nextOrderStep,
-        enabled: selected != null,
-        radius: JhRadii.control,
-        elevated: false,
+        onPressed: selected == null ? null : state.nextOrderStep,
       ),
     );
   }
@@ -74,6 +69,45 @@ class JhDeliveryModeStep extends StatelessWidget {
     final trimmed = address.trim();
     if (trimmed.isEmpty) return '—';
     return trimmed.split(RegExp(r'[,\n]')).first.trim();
+  }
+}
+
+/// Full capsule, dark text on orange -- the reference for this step shows
+/// this style Continue button, same local language as the Package step's.
+class _ContinueCapsule extends StatelessWidget {
+  const _ContinueCapsule({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  static const _height = 56.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onPressed != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      child: GestureDetector(
+        onTap: onPressed,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          height: _height,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: enabled ? JhColors.primary : JhColors.primaryDisabled,
+            borderRadius: BorderRadius.circular(_height / 2),
+          ),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: JhText.ui(size: 16, weight: FontWeight.w800, color: JhColors.ink),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -92,29 +126,48 @@ class _RoutePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final distance = km == null ? '' : '  ·  ~${km!.toStringAsFixed(0)} $kmUnit';
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: JhColors.primaryTint,
-        borderRadius: BorderRadius.circular(JhRadii.control),
+        color: JhColors.surface,
+        borderRadius: BorderRadius.circular(JhRadii.card),
+        border: Border.all(color: JhColors.cardBorder),
       ),
       child: Row(
         children: [
           const Icon(JhIcons.mapPin, size: 15, color: JhColors.primaryText),
           const SizedBox(width: 8),
-          Expanded(
+          Flexible(
             child: Text(
-              '$from → $to$distance',
+              from,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: JhText.ui(
                 size: 12.5,
-                weight: FontWeight.w700,
+                weight: FontWeight.w800,
                 color: JhColors.primaryText,
               ),
             ),
           ),
+          Text(
+            '  →  ',
+            style: JhText.ui(size: 12.5, weight: FontWeight.w700, color: JhColors.textFaint),
+          ),
+          Flexible(
+            child: Text(
+              to,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: JhText.ui(size: 12.5, weight: FontWeight.w800, color: JhColors.ink),
+            ),
+          ),
+          if (km != null)
+            Text(
+              '  ·  ~${km!.toStringAsFixed(0)} $kmUnit',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: JhText.ui(size: 12, weight: FontWeight.w600, color: JhColors.textMuted),
+            ),
         ],
       ),
     );
@@ -152,14 +205,14 @@ class _ModeCard extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: selected ? JhColors.primaryTint : JhColors.surface,
-              borderRadius: BorderRadius.circular(JhRadii.control),
-              // Only the selected card gets an outline -- it's the one piece
-              // of information a border actually carries here. Everything
-              // else separates from the page with a shadow instead.
-              border: selected
-                  ? Border.all(color: JhColors.primary, width: 1.5)
-                  : null,
-              boxShadow: selected ? null : JhShadows.card,
+              borderRadius: BorderRadius.circular(JhRadii.card),
+              // Every card gets a flat outline now -- a shadow this size
+              // under four stacked cards read as a muddy grey smear, the
+              // same bug fixed on the Package step's photo cards.
+              border: Border.all(
+                color: selected ? JhColors.primary : JhColors.cardBorder,
+                width: selected ? 1.5 : 1,
+              ),
             ),
             child: Row(
               children: [
@@ -171,14 +224,16 @@ class _ModeCard extends StatelessWidget {
                     color: selected
                         ? JhColors.primaryText
                         : JhColors.surfaceMuted,
-                    borderRadius: BorderRadius.circular(11),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(
-                    vehicle.icon,
-                    size: 20,
-                    color: selected
-                        ? JhColors.onDark
-                        : JhColors.primaryText,
+                  child: Text(
+                    vehicle.monogram,
+                    style: JhText.ui(
+                      size: 13,
+                      weight: FontWeight.w800,
+                      letterSpacing: 0.2,
+                      color: selected ? JhColors.onDark : JhColors.primaryText,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -211,16 +266,7 @@ class _ModeCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 3),
-                      Text(
-                        vehicle.spec(t),
-                        style: JhText.ui(
-                          size: 11.5,
-                          weight: FontWeight.w500,
-                          color: JhColors.textMuted,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 4),
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.center,
                         spacing: 8,
@@ -310,7 +356,7 @@ class _EstimateCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: JhColors.surface,
         borderRadius: BorderRadius.circular(JhRadii.card),
-        boxShadow: JhShadows.card,
+        border: Border.all(color: JhColors.cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

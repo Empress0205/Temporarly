@@ -24,132 +24,141 @@ class JhProfileScreen extends StatelessWidget {
     final t = state.t;
     final topInset = MediaQuery.viewPaddingOf(context).top;
 
-    return ScrollConfiguration(
-      behavior: const JhScrollBehavior(),
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          topInset + 16,
-          20,
-          JhTabBar.heightOf(context) + 20,
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 18),
+          child: Row(
+            children: [
+              JhRoundBackButton(onPressed: () => state.selectTab(JhTab.home)),
+              const SizedBox(width: 14),
+              Text(
+                t.account,
+                style: JhText.ui(
+                  size: 18,
+                  weight: FontWeight.w800,
+                  letterSpacing: -0.4,
+                ),
+              ),
+              const Spacer(),
+              const JhLangToggle(onDark: false),
+            ],
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                JhRoundBackButton(onPressed: () => state.selectTab(JhTab.home)),
-                const Spacer(),
-                const JhLangToggle(),
-              ],
-            ),
-            const SizedBox(height: 18),
-            _IdentityCard(
-              initials: state.initials,
-              name: state.account.name,
-              roleFallback: t.customerRole,
-              statusLabel: t.activeAccount,
-            ),
-            const SizedBox(height: 16),
-            _InfoCard(
-              rows: [
-                _InfoRow(
-                  icon: JhIcons.fullName,
-                  label: t.fullName,
-                  value: state.account.name.isEmpty ? '—' : state.account.name,
-                ),
-                _InfoRow(
-                  icon: JhIcons.phone,
-                  label: t.phoneLabel,
-                  value: state.prettyAccountPhone,
-                ),
-                _InfoRow(
-                  icon: JhIcons.calendar,
-                  label: t.memberSince,
-                  value: state.prettyMemberSince,
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            _SectionLabel(t.accountSettingsSection),
-            _SettingsCard(
-              rows: [
-                _SettingsRow(
-                  icon: JhIcons.changeNumber,
-                  iconColor: JhColors.primaryText,
-                  title: t.changePhone,
-                  subtitle: t.changePhoneRowSub,
-                  onTap: state.goChangePhone,
-                ),
-                _SettingsRow(
-                  icon: JhIcons.email,
-                  iconColor: JhColors.primaryText,
-                  title: t.updateEmail,
-                  subtitle: t.updateEmailSub,
-                  onTap: () => state.showComingSoon(t.updateEmail),
-                ),
-                _SettingsRow(
-                  icon: JhIcons.notifications,
-                  iconColor: JhColors.primaryText,
-                  title: t.notificationsRow,
-                  subtitle: t.notificationsRowSub,
-                  onTap: () => state.showComingSoon(t.notificationsRow),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            _SectionLabel(t.support),
-            _SettingsCard(
-              rows: [
-                _SettingsRow(
-                  icon: JhIcons.help,
-                  iconColor: JhColors.primaryText,
-                  title: t.helpFaq,
-                  subtitle: t.helpFaqSub,
-                  onTap: () => state.showComingSoon(t.helpFaq),
-                ),
-                _SettingsRow(
-                  icon: JhIcons.lock,
-                  iconColor: JhColors.primaryText,
-                  title: t.privacySecurity,
-                  subtitle: t.privacySecuritySub,
-                  onTap: () => state.showComingSoon(t.privacySecurity),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            _SectionLabel(t.sessionSection),
-            _SettingsCard(
-              rows: [
-                _SettingsRow(
-                  icon: JhIcons.logout,
-                  iconColor: JhColors.danger,
-                  title: t.logout,
-                  subtitle: t.logoutRowSub,
-                  onTap: state.askLogout,
-                ),
-                _SettingsRow(
-                  icon: JhIcons.delete,
-                  iconColor: JhColors.danger,
-                  title: t.deleteAccount,
-                  subtitle: t.deleteAccountSub,
-                  onTap: state.askDeleteAccount,
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            Text(
-              'Jihudumie · Sprint 1 build',
-              textAlign: TextAlign.center,
-              style: JhText.mono(
-                size: 11,
-                weight: FontWeight.w500,
-                color: JhColors.textFaint,
+        Expanded(
+          child: ScrollConfiguration(
+            behavior: const JhScrollBehavior(),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                0,
+                20,
+                JhTabBar.heightOf(context) + 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _IdentityCard(
+                    initials: state.initials,
+                    name: state.account.name,
+                    roleFallback: t.customerRole,
+                    statusLabel: t.activeAccount,
+                  ),
+                  const SizedBox(height: 16),
+                  _InfoCard(
+                    rows: [
+                      _InfoRow(
+                        icon: JhIcons.fullName,
+                        label: t.fullName,
+                        value: state.account.name.isEmpty
+                            ? '—'
+                            : state.account.name,
+                      ),
+                      _InfoRow(
+                        icon: JhIcons.phone,
+                        label: t.phoneLabel,
+                        value: state.prettyAccountPhone,
+                      ),
+                      _InfoRow(
+                        icon: JhIcons.calendar,
+                        label: t.memberSince,
+                        value: state.prettyMemberSince,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  _SectionLabel(t.accountSettingsSection),
+                  _SettingsCard(
+                    rows: [
+                      _SettingsRow(
+                        icon: JhIcons.changeNumber,
+                        iconColor: JhColors.primaryText,
+                        title: t.changePhone,
+                        subtitle: t.changePhoneRowSub,
+                        onTap: state.goChangePhone,
+                      ),
+                      _SettingsRow(
+                        icon: JhIcons.email,
+                        iconColor: JhColors.primaryText,
+                        title: t.updateEmail,
+                        subtitle: t.updateEmailSub,
+                        onTap: () => state.showComingSoon(t.updateEmail),
+                      ),
+                      _SettingsRow(
+                        icon: JhIcons.notifications,
+                        iconColor: JhColors.primaryText,
+                        title: t.notificationsRow,
+                        subtitle: t.notificationsRowSub,
+                        onTap: () => state.showComingSoon(t.notificationsRow),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  _SectionLabel(t.support),
+                  _SettingsCard(
+                    rows: [
+                      _SettingsRow(
+                        icon: JhIcons.help,
+                        iconColor: JhColors.primaryText,
+                        title: t.helpFaq,
+                        subtitle: t.helpFaqSub,
+                        onTap: () => state.showComingSoon(t.helpFaq),
+                      ),
+                      _SettingsRow(
+                        icon: JhIcons.lock,
+                        iconColor: JhColors.primaryText,
+                        title: t.privacySecurity,
+                        subtitle: t.privacySecuritySub,
+                        onTap: () => state.showComingSoon(t.privacySecurity),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  _SectionLabel(t.sessionSection),
+                  _SettingsCard(
+                    rows: [
+                      _SettingsRow(
+                        icon: JhIcons.logout,
+                        iconColor: JhColors.danger,
+                        title: t.logout,
+                        subtitle: t.logoutRowSub,
+                        onTap: state.askLogout,
+                      ),
+                      _SettingsRow(
+                        icon: JhIcons.delete,
+                        iconColor: JhColors.danger,
+                        title: t.deleteAccount,
+                        subtitle: t.deleteAccountSub,
+                        onTap: state.askDeleteAccount,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

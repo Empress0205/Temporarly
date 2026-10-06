@@ -101,9 +101,16 @@ class JhStrings {
     required this.nearbySub,
     required this.favourites,
     required this.favouritesSub,
+    required this.soonLabel,
     required this.recentOrders,
     required this.noOrders,
     required this.noOrdersSub,
+    required this.firstDeliveryTitle,
+    required this.homeStep1,
+    required this.homeStep2,
+    required this.homeStep3,
+    required this.typicalFareLabel,
+    required this.typicalFareValue,
     required this.comingSoon,
     required this.activeAccount,
     required this.customerRole,
@@ -186,6 +193,8 @@ class JhStrings {
     required this.reviewEdit,
     required this.reviewDeliveryPayment,
     required this.reviewPaymentLabel,
+    required this.reviewArrivesIn,
+    required this.reviewTotalLabel,
     required this.sendPackageButton,
     required this.packageUnitOne,
     required this.packageUnitMany,
@@ -219,6 +228,7 @@ class JhStrings {
     required this.pickupLocating,
     required this.pickupSearchHint,
     required this.pickupMoveHint,
+    required this.pickupAddressLabel,
     required this.pickupLandmarkLabel,
     required this.pickupLandmarkHint,
     required this.pickupInstructionsLabel,
@@ -240,8 +250,12 @@ class JhStrings {
     required this.quantityLabel,
     required this.packageDescriptionLabel,
     required this.packageDescriptionHint,
+    required this.describeItemLabel,
     required this.handlingLabel,
     required this.handlingHint,
+    required this.handlingChipFragile,
+    required this.handlingChipUpright,
+    required this.handlingChipCold,
     required this.pkgDocuments,
     required this.pkgClothes,
     required this.pkgFood,
@@ -275,6 +289,7 @@ class JhStrings {
     required this.keepOrder,
     required this.orderCancelledToast,
     required this.contactSupport,
+    required this.shareTrip,
     required this.backToHome,
     required this.proofOfDeliveryTitle,
     required this.receivedByLabel,
@@ -387,9 +402,16 @@ class JhStrings {
   final String nearbySub;
   final String favourites;
   final String favouritesSub;
+  final String soonLabel;
   final String recentOrders;
   final String noOrders;
   final String noOrdersSub;
+  final String firstDeliveryTitle;
+  final String homeStep1;
+  final String homeStep2;
+  final String homeStep3;
+  final String typicalFareLabel;
+  final String typicalFareValue;
   final String comingSoon;
   final String activeAccount;
   final String customerRole;
@@ -473,6 +495,8 @@ class JhStrings {
   final String reviewEdit;
   final String reviewDeliveryPayment;
   final String reviewPaymentLabel;
+  final String reviewArrivesIn;
+  final String reviewTotalLabel;
   final String sendPackageButton;
   final String packageUnitOne;
   final String packageUnitMany;
@@ -506,6 +530,7 @@ class JhStrings {
   final String pickupLocating;
   final String pickupSearchHint;
   final String pickupMoveHint;
+  final String pickupAddressLabel;
   final String pickupLandmarkLabel;
   final String pickupLandmarkHint;
   final String pickupInstructionsLabel;
@@ -527,8 +552,12 @@ class JhStrings {
   final String quantityLabel;
   final String packageDescriptionLabel;
   final String packageDescriptionHint;
+  final String describeItemLabel;
   final String handlingLabel;
   final String handlingHint;
+  final String handlingChipFragile;
+  final String handlingChipUpright;
+  final String handlingChipCold;
   final String pkgDocuments;
   final String pkgClothes;
   final String pkgFood;
@@ -562,6 +591,7 @@ class JhStrings {
   final String keepOrder;
   final String orderCancelledToast;
   final String contactSupport;
+  final String shareTrip;
   final String backToHome;
   final String proofOfDeliveryTitle;
   final String receivedByLabel;
@@ -588,21 +618,20 @@ class JhStrings {
     sending: 'Sending code…',
     verifying: 'Verifying…',
     creating: 'Creating account…',
-    registerTitle: 'Create your account',
+    registerTitle: 'Create account',
     loginTitle: 'Welcome back',
     registerSub: 'Enter your phone number. We will send a verification code by SMS.',
-    registerSubOne:
-        'Fill in your details once. We will send a verification code to the number you enter.',
+    registerSubOne: 'We send a code to confirm the number.',
     oneStepNote:
         'On submit we send a 6-digit code by SMS. Your account is created once the code is verified.',
     loginSub: 'Log in with the phone number registered on your account.',
     phoneLabel: 'Phone number',
-    verifyTitle: 'Verify your phone',
+    verifyTitle: 'Verification code',
     verifySub: 'Enter the 6-digit code sent to',
     verify: 'Verify',
     resend: 'Resend code',
     resendIn: 'Resend in',
-    codeExpiresIn: 'Code expires in',
+    codeExpiresIn: 'Expires in',
     codeExpired: 'Code expired',
     demoFill: 'demo: tap to fill 123456',
     haveAccount: 'Already have an account?',
@@ -675,11 +704,18 @@ class JhStrings {
     trackSub: 'Your orders',
     nearby: 'Nearby',
     nearbySub: 'Vendors near you',
-    favourites: 'Favorites',
+    favourites: 'Favourites',
     favouritesSub: 'Saved stores',
+    soonLabel: 'Soon',
     recentOrders: 'Recent Orders',
     noOrders: 'No orders yet',
     noOrdersSub: 'Start browsing to place your first order',
+    firstDeliveryTitle: 'Your First Delivery',
+    homeStep1: 'Set pickup and destination',
+    homeStep2: 'Say who receives it',
+    homeStep3: 'Pick piki, bajaji, gari or lori',
+    typicalFareLabel: 'Typical fare by piki',
+    typicalFareValue: 'TSh 4,500 – 11,000',
     comingSoon: 'Coming in Sprint 2',
     activeAccount: 'Active account',
     customerRole: 'Customer',
@@ -703,8 +739,8 @@ class JhStrings {
     deleteAccountWarning: 'This action cannot be undone.',
     deleteAccountCta: 'Yes, delete my account',
     myOrders: 'My Orders',
-    sendPackageCard: 'Send a Package',
-    sendPackageCardSub: 'Send safely from one location to another',
+    sendPackageCard: 'Send a package',
+    sendPackageCardSub: 'Safely, from one location to another',
     ordersActive: 'Active',
     ordersCompleted: 'Completed',
     ordersCancelled: 'Cancelled',
@@ -748,7 +784,7 @@ class JhStrings {
     destinationSearchHint: 'Search destination…',
     destinationLandmarkHint: 'e.g. Near ABC Petrol Station',
     destinationConfirm: 'Confirm Destination',
-    deliveryModeTitle: 'Choose Delivery Mode',
+    deliveryModeTitle: 'Delivery method',
     deliveryModeSub: 'Select how your package will be transported.',
     modeUnavailable: 'Unavailable',
     deliveryEstimateTitle: 'Delivery estimate',
@@ -757,11 +793,13 @@ class JhStrings {
     estimateMode: 'Mode',
     estimateTime: 'Estimated time',
     estimateFee: 'Delivery fee',
-    reviewTitle: 'Review Delivery',
+    reviewTitle: 'Review and confirm',
     reviewSub: 'Check everything before sending.',
     reviewEdit: 'Edit',
     reviewDeliveryPayment: 'Delivery & Payment',
     reviewPaymentLabel: 'Payment',
+    reviewArrivesIn: 'arrives in',
+    reviewTotalLabel: 'Total',
     sendPackageButton: 'Send Package',
     packageUnitOne: 'package',
     packageUnitMany: 'packages',
@@ -795,6 +833,7 @@ class JhStrings {
     pickupLocating: 'Finding your location…',
     pickupSearchHint: 'Search location…',
     pickupMoveHint: 'Move map to adjust pin',
+    pickupAddressLabel: 'Address',
     pickupLandmarkLabel: 'Landmark',
     pickupLandmarkHint: 'e.g. Near XYZ Shop',
     pickupInstructionsLabel: 'Pickup instructions',
@@ -817,8 +856,12 @@ class JhStrings {
     quantityLabel: 'Quantity',
     packageDescriptionLabel: 'Package description',
     packageDescriptionHint: 'Briefly describe your package',
-    handlingLabel: 'Handling instructions',
-    handlingHint: 'e.g. Fragile, handle with care',
+    describeItemLabel: 'Describe the item',
+    handlingLabel: 'Handling notes',
+    handlingHint: 'Add any handling instructions',
+    handlingChipFragile: 'Fragile',
+    handlingChipUpright: 'Keep upright',
+    handlingChipCold: 'Keep cold',
     pkgDocuments: 'Documents',
     pkgClothes: 'Clothes',
     pkgFood: 'Food',
@@ -826,11 +869,11 @@ class JhStrings {
     pkgHousehold: 'Household Item',
     pkgOther: 'Other',
     sizeSmall: 'Small',
-    sizeSmallSub: 'Fits in a backpack',
+    sizeSmallSub: 'Up to 5 kg',
     sizeMedium: 'Medium',
-    sizeMediumSub: 'Fits in a suitcase',
+    sizeMediumSub: '5–20 kg',
     sizeLarge: 'Large',
-    sizeLargeSub: 'Oversized item',
+    sizeLargeSub: '20 kg +',
     declarationTitle: 'Package Declaration',
     declarationBody:
         'I confirm that this package does not contain prohibited or restricted items.',
@@ -855,6 +898,7 @@ class JhStrings {
     keepOrder: 'Keep Order',
     orderCancelledToast: 'Order cancelled',
     contactSupport: 'Contact Support',
+    shareTrip: 'Share trip',
     backToHome: 'Back to Home',
     proofOfDeliveryTitle: 'Proof of Delivery',
     receivedByLabel: 'Received by',
@@ -883,21 +927,20 @@ class JhStrings {
     sending: 'Tunatuma namba…',
     verifying: 'Tunathibitisha…',
     creating: 'Tunafungua akaunti…',
-    registerTitle: 'Fungua akaunti yako',
+    registerTitle: 'Fungua akaunti',
     loginTitle: 'Karibu tena',
     registerSub: 'Weka namba yako ya simu. Tutakutumia namba ya uthibitisho kwa SMS.',
-    registerSubOne:
-        'Jaza taarifa zako mara moja. Tutatuma namba ya uthibitisho kwenye simu uliyoweka.',
+    registerSubOne: 'Tunatuma namba ya uthibitisho kuthibitisha simu yako.',
     oneStepNote:
         'Tutatuma namba ya tarakimu 6 kwa SMS. Akaunti yako inafunguliwa baada ya uthibitisho.',
     loginSub: 'Ingia kwa namba ya simu iliyosajiliwa kwenye akaunti yako.',
     phoneLabel: 'Namba ya simu',
-    verifyTitle: 'Thibitisha simu yako',
+    verifyTitle: 'Namba ya uthibitisho',
     verifySub: 'Weka namba 6 tulizotuma kwa',
     verify: 'Thibitisha',
     resend: 'Tuma tena',
     resendIn: 'Tuma tena baada ya',
-    codeExpiresIn: 'Namba inaisha baada ya',
+    codeExpiresIn: 'Inaisha baada ya',
     codeExpired: 'Namba imeisha',
     demoFill: 'onyesho: bonyeza kuweka 123456',
     haveAccount: 'Una akaunti tayari?',
@@ -972,9 +1015,16 @@ class JhStrings {
     nearbySub: 'Wauzaji walio karibu',
     favourites: 'Vipendwa',
     favouritesSub: 'Maduka uliyohifadhi',
+    soonLabel: 'Karibuni',
     recentOrders: 'Oda za hivi karibuni',
     noOrders: 'Bado hakuna oda',
     noOrdersSub: 'Anza kuvinjari ili kuweka oda yako ya kwanza',
+    firstDeliveryTitle: 'Usafirishaji Wako wa Kwanza',
+    homeStep1: 'Weka mahali pa kuchukua na kupeleka',
+    homeStep2: 'Sema nani atapokea',
+    homeStep3: 'Chagua piki, bajaji, gari au lori',
+    typicalFareLabel: 'Nauli ya kawaida kwa piki',
+    typicalFareValue: 'TSh 4,500 – 11,000',
     comingSoon: 'Inakuja katika Sprint 2',
     activeAccount: 'Akaunti inatumika',
     customerRole: 'Mteja',
@@ -1043,7 +1093,7 @@ class JhStrings {
     destinationSearchHint: 'Tafuta mahali pa kufikisha…',
     destinationLandmarkHint: 'mf. Karibu na Kituo cha Mafuta cha ABC',
     destinationConfirm: 'Thibitisha Mahali',
-    deliveryModeTitle: 'Chagua Njia ya Usafirishaji',
+    deliveryModeTitle: 'Njia ya usafirishaji',
     deliveryModeSub: 'Chagua jinsi kifurushi chako kitakavyosafirishwa.',
     modeUnavailable: 'Haipatikani',
     deliveryEstimateTitle: 'Makadirio ya usafirishaji',
@@ -1052,11 +1102,13 @@ class JhStrings {
     estimateMode: 'Njia',
     estimateTime: 'Muda wa makadirio',
     estimateFee: 'Ada ya usafirishaji',
-    reviewTitle: 'Kagua Usafirishaji',
+    reviewTitle: 'Kagua na thibitisha',
     reviewSub: 'Hakiki kila kitu kabla ya kutuma.',
     reviewEdit: 'Hariri',
     reviewDeliveryPayment: 'Usafirishaji na Malipo',
     reviewPaymentLabel: 'Malipo',
+    reviewArrivesIn: 'inafika baada ya',
+    reviewTotalLabel: 'Jumla',
     sendPackageButton: 'Tuma Kifurushi',
     packageUnitOne: 'kifurushi',
     packageUnitMany: 'vifurushi',
@@ -1090,6 +1142,7 @@ class JhStrings {
     pickupLocating: 'Tunatafuta mahali ulipo…',
     pickupSearchHint: 'Tafuta mahali…',
     pickupMoveHint: 'Sogeza ramani kurekebisha alama',
+    pickupAddressLabel: 'Anwani',
     pickupLandmarkLabel: 'Alama ya eneo',
     pickupLandmarkHint: 'mf. Karibu na Duka la XYZ',
     pickupInstructionsLabel: 'Maelekezo ya kuchukua',
@@ -1112,8 +1165,12 @@ class JhStrings {
     quantityLabel: 'Idadi',
     packageDescriptionLabel: 'Maelezo ya kifurushi',
     packageDescriptionHint: 'Eleza kwa ufupi kifurushi chako',
-    handlingLabel: 'Maelekezo ya utunzaji',
-    handlingHint: 'mf. Dhaifu, shika kwa uangalifu',
+    describeItemLabel: 'Eleza kitu hicho',
+    handlingLabel: 'Maelezo ya utunzaji',
+    handlingHint: 'Ongeza maelekezo yoyote ya utunzaji',
+    handlingChipFragile: 'Dhaifu',
+    handlingChipUpright: 'Weka wima',
+    handlingChipCold: 'Weka baridi',
     pkgDocuments: 'Nyaraka',
     pkgClothes: 'Nguo',
     pkgFood: 'Chakula',
@@ -1121,11 +1178,11 @@ class JhStrings {
     pkgHousehold: 'Kifaa cha Nyumbani',
     pkgOther: 'Nyingine',
     sizeSmall: 'Ndogo',
-    sizeSmallSub: 'Inaingia kwenye mkoba',
+    sizeSmallSub: 'Hadi kg 5',
     sizeMedium: 'Wastani',
-    sizeMediumSub: 'Inaingia kwenye sanduku',
+    sizeMediumSub: 'Kg 5–20',
     sizeLarge: 'Kubwa',
-    sizeLargeSub: 'Kifaa kikubwa kupita kiasi',
+    sizeLargeSub: 'Kg 20 +',
     declarationTitle: 'Tamko la Kifurushi',
     declarationBody:
         'Nathibitisha kuwa kifurushi hiki hakina vitu vilivyopigwa marufuku au vyenye vikwazo.',
@@ -1150,6 +1207,7 @@ class JhStrings {
     keepOrder: 'Endelea na Oda',
     orderCancelledToast: 'Oda imeghairiwa',
     contactSupport: 'Wasiliana na Msaada',
+    shareTrip: 'Shiriki safari',
     backToHome: 'Rudi Nyumbani',
     proofOfDeliveryTitle: 'Uthibitisho wa Ufikishaji',
     receivedByLabel: 'Imepokewa na',

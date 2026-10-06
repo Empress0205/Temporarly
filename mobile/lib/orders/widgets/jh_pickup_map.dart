@@ -22,6 +22,7 @@ class JhPickupMap extends StatefulWidget {
     this.onPinMoved,
     this.caption,
     this.height = 176,
+    this.radius = JhRadii.control,
   });
 
   final bool live;
@@ -37,6 +38,7 @@ class JhPickupMap extends StatefulWidget {
   /// Shown under the pin in the placeholder.
   final String? caption;
   final double height;
+  final double radius;
 
   static const _fallback = LatLng(-6.7924, 39.2083); // Dar es Salaam
 
@@ -73,7 +75,7 @@ class _JhPickupMapState extends State<JhPickupMap> {
   Widget build(BuildContext context) {
     final target = widget.center ?? JhPickupMap._fallback;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(JhRadii.control),
+      borderRadius: BorderRadius.circular(widget.radius),
       child: SizedBox(
         height: widget.height,
         width: double.infinity,

@@ -80,6 +80,14 @@ extension JhVehicleX on JhVehicle {
     JhVehicle.van => JhIcons.van,
   };
 
+  /// A 2-letter avatar tag for the delivery-mode picker, alongside the icon.
+  String get monogram => switch (this) {
+    JhVehicle.motorcycle => 'MC',
+    JhVehicle.bajaji => 'BJ',
+    JhVehicle.car => 'CR',
+    JhVehicle.van => 'LR',
+  };
+
   /// Matches `Vehicle` in `backend/orders/models.py`.
   String get apiValue => switch (this) {
     JhVehicle.motorcycle => 'MOTORCYCLE',
@@ -270,6 +278,7 @@ class JhOrder {
     required this.paid,
     required this.paymentMethod,
     required this.createdAt,
+    required this.updatedAt,
     required this.recipientName,
     required this.recipientPhone,
     required this.packageType,
@@ -306,6 +315,12 @@ class JhOrder {
   final bool paid;
   final JhPaymentMethod paymentMethod;
   final DateTime createdAt;
+
+  /// When the record last changed. Under the current admin-driven stage
+  /// progression, that's effectively "when it entered [stage]" -- the only
+  /// per-stage moment the backend actually records (see `services.py`/the
+  /// tracking screen's `_Timeline`, which only shows a time for this reason).
+  final DateTime updatedAt;
 
   final String recipientName;
   final String recipientPhone;
@@ -358,6 +373,7 @@ class JhOrder {
     paid: paid,
     paymentMethod: paymentMethod,
     createdAt: createdAt,
+    updatedAt: updatedAt,
     recipientName: recipientName,
     recipientPhone: recipientPhone,
     packageType: packageType,
@@ -383,18 +399,21 @@ class JhOrder {
   /// The draft→field mapping, still exercised by a unit test even though
   /// `_commitOrder` talks to the real API now rather than calling this
   /// directly. [serverId] has no real backend counterpart here, so it
-  /// defaults to [id].
+  /// defaults to [id]; [updatedAt] defaults to [createdAt] -- a draft has
+  /// never been updated.
   factory JhOrder.fromDraft(
     JhOrderDraft d, {
     required String id,
     required DateTime createdAt,
     String? serverId,
+    DateTime? updatedAt,
   }) {
     final vehicle = d.deliveryMode ?? JhVehicle.motorcycle;
     return JhOrder(
       id: id,
       serverId: serverId ?? id,
       createdAt: createdAt,
+      updatedAt: updatedAt ?? createdAt,
       pickupArea: _firstSegment(d.pickupAddress),
       dropoffArea: _firstSegment(d.dropoffAddress),
       status: JhOrderStatus.inTransit,
@@ -441,6 +460,9 @@ class JhOrder {
         json['payment_method'] as String? ?? '',
       ),
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ??
+          DateTime.tryParse(json['created_at'] as String? ?? '') ??
           DateTime.now(),
       recipientName: json['recipient_name'] as String? ?? '',
       recipientPhone: json['recipient_phone'] as String? ?? '',

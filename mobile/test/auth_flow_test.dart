@@ -43,6 +43,17 @@ extension _Pump on WidgetTester {
     await pump();
   }
 
+  /// Like [tapText], but for the rarer label that appears twice on one
+  /// screen (Register's header title and its "Create account" button now
+  /// read the same, matching the reference design) -- the button is always
+  /// the later match in the tree.
+  Future<void> tapLastText(String label) async {
+    final finder = find.text(label).last;
+    await ensureVisible(finder);
+    await tap(finder);
+    await pump();
+  }
+
   /// Lets the pending API future resolve and the UI rebuild.
   Future<void> settle() async {
     await pump();
@@ -71,7 +82,7 @@ Future<JhAppState> toOtpViaRegister(
   final state = await tester.boot(api);
   await tester.tapText(t.continueLabel);
   await fillRegistration(tester);
-  await tester.tapText(t.createAccount);
+  await tester.tapLastText(t.createAccount);
   await tester.settle();
   return state;
 }
@@ -136,7 +147,7 @@ void main() {
       final state = await tester.boot(api);
       await tester.tapText(t.continueLabel);
       await fillRegistration(tester, phone: '712345678');
-      await tester.tapText(t.createAccount);
+      await tester.tapLastText(t.createAccount);
       await tester.settle();
 
       expect(state.screen, JhScreen.register);
@@ -159,7 +170,7 @@ void main() {
       await tester.enterText(fields.at(1), 'not-an-email');
       await tester.enterText(fields.at(2), '712000111');
       await tester.pump();
-      await tester.tapText(t.createAccount);
+      await tester.tapLastText(t.createAccount);
       await tester.settle();
 
       expect(find.text(t.errName), findsOneWidget);
@@ -487,7 +498,7 @@ void main() {
       final state = await tester.boot(api);
       await tester.tapText(t.continueLabel);
       await fillRegistration(tester);
-      await tester.tapText(t.createAccount);
+      await tester.tapLastText(t.createAccount);
       await tester.settle();
 
       expect(find.text(t.errNet), findsOneWidget);
@@ -536,7 +547,10 @@ void main() {
       expect(state.screen, JhScreen.register);
       expect(state.name, 'Grace Mushi');
       expect(state.phone, '712000111');
-      expect(find.text(JhStrings.sw.registerTitle), findsOneWidget);
+      // findsWidgets, not findsOneWidget: the header title and the
+      // "Create account" button now read the same, matching the reference
+      // design -- this only needs to confirm the Swahili copy landed.
+      expect(find.text(JhStrings.sw.registerTitle), findsWidgets);
     });
   });
 

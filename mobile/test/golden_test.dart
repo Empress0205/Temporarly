@@ -120,7 +120,14 @@ void main() {
         find.byType(SingleChildScrollView).first,
         Offset(0, -scrollBy),
       );
+      // A drag release can leave the scrollable with residual velocity, and
+      // one pump can land mid-fling -- part of the content still animating
+      // toward its resting position renders in the wrong place for that one
+      // frame (visible as a stray line bleeding above the tracking sheet, for
+      // instance). A few more pumps drain that animation before the capture.
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 300));
     }
 
     // The package-photo goldens decode a real PNG (`Image.memory`); that

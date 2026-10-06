@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../state/app_state.dart';
-import '../theme/tokens.dart';
+import '../widgets/jh_auth_capsule_button.dart';
 import '../widgets/jh_buttons.dart';
 import '../widgets/jh_feedback.dart';
 import '../widgets/jh_fields.dart';
@@ -29,6 +29,7 @@ class JhRegisterScreen extends StatelessWidget {
         onBack: state.back,
         title: t.registerTitle,
         subtitle: t.registerSubOne,
+        showLockup: false,
       ),
       body: [
         JhLabeledField(
@@ -73,25 +74,13 @@ class JhRegisterScreen extends StatelessWidget {
       footer: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          JhPrimaryButton(
+          JhAuthCapsuleButton(
             label: busy ? t.sending : t.createAccount,
             busy: busy,
             enabled: state.loading == JhLoading.none,
             onPressed: state.submitRegister,
-            radius: JhRadii.control,
-            elevated: false,
           ),
           const SizedBox(height: 13),
-          Text(
-            t.oneStepNote,
-            textAlign: TextAlign.center,
-            style: JhText.ui(
-              size: 12,
-              weight: FontWeight.w400,
-              color: const Color(0xAD0F1A15), // rgba(15,26,21,.68)
-              height: 1.5,
-            ),
-          ),
           JhSwitchPrompt(
             prompt: t.haveAccount,
             action: t.login,

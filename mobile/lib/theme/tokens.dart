@@ -8,9 +8,11 @@ import 'package:flutter/material.dart';
 class JhColors {
   JhColors._();
 
-  static const background = Color(0xFFF4F6F3);
+  // Flat and neutral on purpose -- no warm/cream cast, no gradient. Cards
+  // stand off this purely through [JhShadows.card]'s elevation.
+  static const background = Color(0xFFF5F5F3);
   static const surface = Color(0xFFFFFFFF);
-  static const surfaceMuted = Color(0xFFEDF1EC);
+  static const surfaceMuted = Color(0xFFEFEFEC);
   static const cellEmpty = Color(0xFFF1F4F0);
 
   static const ink = Color(0xFF0F1A15);
@@ -129,10 +131,15 @@ class JhShadows {
   static const button = [
     BoxShadow(color: Color(0x33F7941D), blurRadius: 18, offset: Offset(0, 8)),
   ];
-  // Cards are shadow-only now (no stroke) -- tight and faint rather than the
-  // border-plus-shadow combination that made every surface look outlined.
+  // Cards are shadow-only (no stroke) and genuinely lifted. Two layers, the
+  // way real elevation is usually built: a tight, crisper shadow right at
+  // the edge so the card reads as a distinct object, plus a big soft one
+  // underneath for the ambient lift -- one layer alone read as barely-there
+  // once the page background went flat/near-white and stopped supplying any
+  // contrast of its own.
   static const card = [
-    BoxShadow(color: Color(0x0D0F1A15), blurRadius: 14, offset: Offset(0, 4)),
+    BoxShadow(color: Color(0x1A0F1A15), blurRadius: 4, offset: Offset(0, 2)),
+    BoxShadow(color: Color(0x330F1A15), blurRadius: 32, offset: Offset(0, 16)),
   ];
   static const heroCard = [
     BoxShadow(color: Color(0x160F1A15), blurRadius: 20, offset: Offset(0, 8)),

@@ -36,49 +36,62 @@ class JhRecentPlaces extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        for (final place in places)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Semantics(
-              button: true,
-              label: place.address,
-              child: GestureDetector(
-                onTap: () => onSelect(place),
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: JhColors.surface,
-                    borderRadius: BorderRadius.circular(JhRadii.control),
-                    boxShadow: JhShadows.card,
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        JhIcons.recent,
-                        size: 16,
-                        color: JhColors.textMuted,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          place.address,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: JhText.ui(size: 13, weight: FontWeight.w600),
-                        ),
-                      ),
-                    ],
-                  ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final place in places)
+              _Chip(place: place, onTap: () => onSelect(place)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({required this.place, required this.onTap});
+
+  final JhPlace place;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: place.address,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          decoration: BoxDecoration(
+            color: JhColors.surface,
+            borderRadius: BorderRadius.circular(JhRadii.pill),
+            border: Border.all(color: JhColors.cardBorder),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                JhIcons.recent,
+                size: 14,
+                color: JhColors.textMuted,
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  place.address,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: JhText.ui(size: 12.5, weight: FontWeight.w700),
                 ),
               ),
-            ),
+            ],
           ),
-        const SizedBox(height: 14),
-      ],
+        ),
+      ),
     );
   }
 }

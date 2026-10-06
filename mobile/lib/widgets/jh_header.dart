@@ -16,14 +16,25 @@ class JhAuthHeader extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.extra,
+    this.showLockup = true,
+    this.titleGap = 18,
   });
 
   final VoidCallback onBack;
   final String title;
-  final String subtitle;
+  final String? subtitle;
 
   /// An extra line under the subtitle — the OTP screen puts the number here.
   final Widget? extra;
+
+  /// Off for Register/OTP's plainer header, matching their reference (just
+  /// the back button and language toggle, no brand lockup). Login and
+  /// ChangePhone keep it.
+  final bool showLockup;
+
+  /// Space between the back-button row and the title. OTP's reference gives
+  /// this a lot more room to breathe than Register's.
+  final double titleGap;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +42,7 @@ class JhAuthHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      color: JhColors.surface,
+      color: JhColors.background,
       padding: EdgeInsets.fromLTRB(20, topInset + 12, 20, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,12 +52,14 @@ class JhAuthHeader extends StatelessWidget {
             children: [
               JhRoundBackButton(onPressed: onBack),
               const Spacer(),
-              const JhBrandLockup(tileSize: 30, wordSize: 16),
-              const Spacer(),
+              if (showLockup) ...[
+                const JhBrandLockup(tileSize: 30, wordSize: 16),
+                const Spacer(),
+              ],
               const JhLangToggle(onDark: false),
             ],
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: titleGap),
           Text(
             title,
             style: JhText.ui(
@@ -56,16 +69,18 @@ class JhAuthHeader extends StatelessWidget {
               color: JhColors.ink,
             ),
           ),
-          const SizedBox(height: 7),
-          Text(
-            subtitle,
-            style: JhText.ui(
-              size: 13.5,
-              weight: FontWeight.w500,
-              color: JhColors.textMuted,
-              height: 1.5,
+          if (subtitle != null && subtitle!.isNotEmpty) ...[
+            const SizedBox(height: 7),
+            Text(
+              subtitle!,
+              style: JhText.ui(
+                size: 13.5,
+                weight: FontWeight.w500,
+                color: JhColors.textMuted,
+                height: 1.5,
+              ),
             ),
-          ),
+          ],
           if (extra != null) ...[const SizedBox(height: 6), extra!],
         ],
       ),

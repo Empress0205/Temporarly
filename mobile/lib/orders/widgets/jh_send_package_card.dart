@@ -3,7 +3,11 @@ import 'package:flutter/widgets.dart';
 import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
 
-/// The green "Send a Package" call-to-action. On Home and on My Orders.
+/// The orange "Send a Package" call-to-action. On Home and on My Orders.
+///
+/// Dark text on the orange fill, not white -- reads calmer than a white-on-
+/// orange card, and the black circle+arrow reads as "go" without needing a
+/// second colour.
 class JhSendPackageCard extends StatelessWidget {
   const JhSendPackageCard({
     super.key,
@@ -25,28 +29,13 @@ class JhSendPackageCard extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: JhColors.primaryText,
+            color: JhColors.primary,
             borderRadius: BorderRadius.circular(JhRadii.card),
           ),
           child: Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: JhColors.onDarkSurfaceSoft,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  JhIcons.box,
-                  size: 22,
-                  color: JhColors.onDark,
-                ),
-              ),
-              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,18 +43,19 @@ class JhSendPackageCard extends StatelessWidget {
                     Text(
                       title,
                       style: JhText.ui(
-                        size: 15.5,
+                        size: 19,
                         weight: FontWeight.w800,
-                        color: JhColors.onDark,
+                        letterSpacing: -0.4,
+                        color: JhColors.ink,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       subtitle,
                       style: JhText.ui(
-                        size: 12,
-                        weight: FontWeight.w500,
-                        color: JhColors.onDarkFaint,
+                        size: 12.5,
+                        weight: FontWeight.w600,
+                        color: JhColors.inkMuted,
                         height: 1.35,
                       ),
                     ),
@@ -73,10 +63,19 @@ class JhSendPackageCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(
-                JhIcons.chevron,
-                size: 22,
-                color: JhColors.onDarkFaint,
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: JhColors.brandCharcoal,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  JhIcons.forward,
+                  size: 19,
+                  color: JhColors.onDark,
+                ),
               ),
             ],
           ),

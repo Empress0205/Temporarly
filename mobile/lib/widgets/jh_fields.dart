@@ -19,11 +19,13 @@ class JhFieldShell extends StatelessWidget {
     required this.child,
     required this.borderColor,
     this.height = 58,
+    this.radius = JhRadii.control,
   });
 
   final Widget child;
   final Color borderColor;
   final double height;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class JhFieldShell extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: JhColors.surface,
-        borderRadius: BorderRadius.circular(JhRadii.control),
+        borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: borderColor, width: 1.5),
       ),
       child: child,
@@ -222,6 +224,7 @@ class JhTextArea extends StatefulWidget {
     required this.placeholder,
     this.minLines = 3,
     this.maxLines = 5,
+    this.radius = JhRadii.control,
   });
 
   final String value;
@@ -229,6 +232,7 @@ class JhTextArea extends StatefulWidget {
   final String placeholder;
   final int minLines;
   final int maxLines;
+  final double radius;
 
   @override
   State<JhTextArea> createState() => _JhTextAreaState();
@@ -243,7 +247,7 @@ class _JhTextAreaState extends State<JhTextArea>
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
         color: JhColors.surface,
-        borderRadius: BorderRadius.circular(JhRadii.control),
+        borderRadius: BorderRadius.circular(widget.radius),
         border: Border.all(
           color: jhFieldBorder(hasError: false),
           width: 1.5,

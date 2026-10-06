@@ -80,5 +80,5 @@ class JhIcons {
   static const pkgFood = Icons.lunch_dining_rounded;
   static const pkgElectronics = Icons.devices_other_rounded;
   static const pkgHousehold = Icons.chair_outlined;
-  static const pkgOther = Icons.category_rounded;
+  static const pkgOther = Icons.edit_rounded;
 }

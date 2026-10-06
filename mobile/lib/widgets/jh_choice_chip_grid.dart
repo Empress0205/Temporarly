@@ -9,7 +9,9 @@ class JhChoice<T> {
   final IconData? icon;
 }
 
-/// A wrap of single-select pill chips — the package-type picker.
+/// A fixed 2-column grid of single-select pill chips — the package-type
+/// picker. Each chip fills its column, so rows stay even instead of the
+/// ragged trailing gap a text-sized [Wrap] leaves behind an odd item.
 class JhChoiceChipGrid<T> extends StatelessWidget {
   const JhChoiceChipGrid({
     super.key,
@@ -24,19 +26,38 @@ class JhChoiceChipGrid<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: [
-        for (final option in options)
-          _Chip(
-            label: option.label,
-            icon: option.icon,
-            selected: option.value == selected,
-            onTap: () => onSelected(option.value),
-          ),
-      ],
-    );
+    final rows = <Widget>[];
+    for (var i = 0; i < options.length; i += 2) {
+      if (rows.isNotEmpty) rows.add(const SizedBox(height: 10));
+      final left = options[i];
+      final right = i + 1 < options.length ? options[i + 1] : null;
+      rows.add(
+        Row(
+          children: [
+            Expanded(
+              child: _Chip(
+                label: left.label,
+                icon: left.icon,
+                selected: left.value == selected,
+                onTap: () => onSelected(left.value),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: right == null
+                  ? const SizedBox.shrink()
+                  : _Chip(
+                      label: right.label,
+                      icon: right.icon,
+                      selected: right.value == selected,
+                      onTap: () => onSelected(right.value),
+                    ),
+            ),
+          ],
+        ),
+      );
+    }
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows);
   }
 }
 
@@ -73,15 +94,19 @@ class _Chip extends StatelessWidget {
             ),
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
                 Icon(icon, size: 15, color: fg),
                 const SizedBox(width: 6),
               ],
-              Text(
-                label,
-                style: JhText.ui(size: 13, weight: FontWeight.w700, color: fg),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: JhText.ui(size: 13, weight: FontWeight.w700, color: fg),
+                ),
               ),
             ],
           ),

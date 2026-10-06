@@ -2,14 +2,13 @@ import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 
+import '../../l10n/dict.dart';
 import '../../state/app_state.dart';
 import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/jh_buttons.dart';
 import '../../widgets/jh_checkbox.dart';
 import '../../widgets/jh_choice_chip_grid.dart';
 import '../../widgets/jh_fields.dart';
-import '../../widgets/jh_radio_card.dart';
 import '../../widgets/jh_scope.dart';
 import '../../widgets/jh_stepper.dart';
 import '../order_models.dart';
@@ -31,11 +30,10 @@ class JhPackageStep extends StatelessWidget {
       crumb: t.stepTitlePackage,
       stepLabel: state.stepLabel(3),
       title: t.packageTitle,
-      subtitle: t.packageSub,
       onBack: state.back,
       toastVisible: state.toast.isNotEmpty,
       body: [
-        JhFieldLabel(t.packageTypeLabel),
+        _SectionLabel(t.packageTypeLabel),
         const SizedBox(height: 10),
         JhChoiceChipGrid<JhPackageType>(
           selected: draft.packageType,
@@ -45,44 +43,41 @@ class JhPackageStep extends StatelessWidget {
               JhChoice(value: type, label: type.label(t), icon: type.icon),
           ],
         ),
-        const SizedBox(height: 20),
-        JhFieldLabel(t.packageSizeLabel),
-        const SizedBox(height: 10),
-        for (final size in JhPackageSize.values) ...[
-          JhRadioCard(
-            title: size.label(t),
-            subtitle: size.sub(t),
-            selected: draft.packageSize == size,
-            onTap: () => state.setPackageSize(size),
-          ),
-          if (size != JhPackageSize.large) const SizedBox(height: 8),
-        ],
-        const SizedBox(height: 20),
-        JhFieldLabel(t.quantityLabel),
-        const SizedBox(height: 10),
-        JhStepper(value: draft.quantity, onChanged: state.setQuantity),
-        const SizedBox(height: 20),
-        JhLabeledField(
-          label: '${t.packageDescriptionLabel} (${t.optionalSuffix})',
-          child: JhTextArea(
+        // Only "Other" needs a free-text clarification -- every other type
+        // already says what it is.
+        if (draft.packageType == JhPackageType.other) ...[
+          const SizedBox(height: 18),
+          _SectionLabel(t.describeItemLabel, color: JhColors.primaryText),
+          const SizedBox(height: 8),
+          _UnderlineField(
             value: draft.packageDescription,
             onChanged: state.setPackageDescription,
             placeholder: t.packageDescriptionHint,
           ),
+        ],
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(child: _SectionLabel(t.packageSizeLabel)),
+            _SectionLabel(t.quantityLabel),
+            const SizedBox(width: 10),
+            JhStepper(value: draft.quantity, onChanged: state.setQuantity),
+          ],
         ),
-        const SizedBox(height: 18),
-        JhLabeledField(
-          label: '${t.handlingLabel} (${t.optionalSuffix})',
-          child: JhTextArea(
-            value: draft.handlingInstructions,
-            onChanged: state.setHandlingInstructions,
-            placeholder: t.handlingHint,
-            minLines: 1,
-            maxLines: 3,
-          ),
+        const SizedBox(height: 10),
+        _SizeGrid(
+          selected: draft.packageSize,
+          onSelected: state.setPackageSize,
+          t: t,
         ),
         const SizedBox(height: 20),
         const _PhotoAttach(),
+        const SizedBox(height: 20),
+        _HandlingNotes(
+          value: draft.handlingInstructions,
+          onChanged: state.setHandlingInstructions,
+          t: t,
+        ),
         const SizedBox(height: 20),
         _DeclarationBox(
           title: t.declarationTitle,
@@ -93,11 +88,210 @@ class JhPackageStep extends StatelessWidget {
           onChanged: state.setDeclarationAccepted,
         ),
       ],
-      footer: JhPrimaryButton(
+      footer: _ContinueCapsule(
         label: t.continueLabel,
         onPressed: state.nextOrderStep,
-        radius: JhRadii.control,
-        elevated: false,
+      ),
+    );
+  }
+}
+
+/// Full capsule, dark text on orange -- the reference for this step shows
+/// this style Continue button, distinct from the other wizard steps' shared
+/// [JhPrimaryButton] (white text, not fully rounded), which stays untouched
+/// here since only this step's reference asked for the change.
+class _ContinueCapsule extends StatelessWidget {
+  const _ContinueCapsule({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  static const _height = 56.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: onPressed,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          height: _height,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: JhColors.primary,
+            borderRadius: BorderRadius.circular(_height / 2),
+          ),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: JhText.ui(size: 16, weight: FontWeight.w800, color: JhColors.ink),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The small uppercase, tracked-letter-spacing group header this step uses
+/// above each cluster of choices ("TYPE", "SIZE", "QUANTITY", "HANDLING
+/// NOTES") -- distinct from [JhFieldLabel], which stays plain sentence case
+/// for an actual input's own label (the Register/Login fields). This is a
+/// section heading, the same role as Home's "QUICK ACTIONS".
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text, {this.color = JhColors.textFaint});
+
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    text.toUpperCase(),
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: JhText.ui(
+      size: 11,
+      weight: FontWeight.w800,
+      letterSpacing: 0.6,
+      color: color,
+    ),
+  );
+}
+
+/// A borderless field with just a bottom rule -- the "Describe the item"
+/// field that only appears once "Other" is picked.
+class _UnderlineField extends StatefulWidget {
+  const _UnderlineField({
+    required this.value,
+    required this.onChanged,
+    required this.placeholder,
+  });
+
+  final String value;
+  final ValueChanged<String> onChanged;
+  final String placeholder;
+
+  @override
+  State<_UnderlineField> createState() => _UnderlineFieldState();
+}
+
+class _UnderlineFieldState extends State<_UnderlineField>
+    with JhControllerSync<_UnderlineField> {
+  @override
+  Widget build(BuildContext context) {
+    syncController(widget.value);
+    return Container(
+      padding: const EdgeInsets.only(bottom: 8),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: JhColors.cardBorder)),
+      ),
+      child: EditableTextField(
+        controller: controller,
+        onChanged: widget.onChanged,
+        placeholder: widget.placeholder,
+        style: JhText.ui(size: 15, weight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+/// Three cards in a row -- an outline, not a fill, marks the selected size,
+/// matching the mockup rather than the single-column radio list this used to
+/// be.
+class _SizeGrid extends StatelessWidget {
+  const _SizeGrid({
+    required this.selected,
+    required this.onSelected,
+    required this.t,
+  });
+
+  final JhPackageSize selected;
+  final ValueChanged<JhPackageSize> onSelected;
+  final JhStrings t;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        for (final size in JhPackageSize.values) ...[
+          if (size != JhPackageSize.values.first) const SizedBox(width: 10),
+          Expanded(
+            child: _SizeCard(
+              label: size.label(t),
+              subtitle: size.sub(t),
+              selected: size == selected,
+              onTap: () => onSelected(size),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _SizeCard extends StatelessWidget {
+  const _SizeCard({
+    required this.label,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: '$label. $subtitle',
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+          decoration: BoxDecoration(
+            color: JhColors.surface,
+            borderRadius: BorderRadius.circular(JhRadii.control),
+            border: Border.all(
+              color: selected ? JhColors.primary : JhColors.cardBorder,
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                JhIcons.box,
+                size: 17,
+                color: selected ? JhColors.primaryText : JhColors.textMuted,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: JhText.ui(size: 13, weight: FontWeight.w800),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: JhText.ui(
+                  size: 10.5,
+                  weight: FontWeight.w500,
+                  color: JhColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -115,48 +309,32 @@ class _PhotoAttach extends StatelessWidget {
     final t = state.t;
     final photo = state.draft.packagePhoto;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    if (photo != null) {
+      return _PhotoThumb(
+        bytes: photo,
+        removeLabel: t.removePhotoLabel,
+        onRemove: state.removePackagePhoto,
+      );
+    }
+    return Row(
       children: [
-        JhFieldLabel('${t.attachPhotoLabel} (${t.optionalSuffix})'),
-        const SizedBox(height: 10),
-        if (photo != null)
-          _PhotoThumb(
-            bytes: photo,
-            removeLabel: t.removePhotoLabel,
-            onRemove: state.removePackagePhoto,
-          )
-        else ...[
-          Text(
-            t.attachPhotoHint,
-            style: JhText.ui(
-              size: 12,
-              weight: FontWeight.w500,
-              color: JhColors.textMuted,
-              height: 1.4,
-            ),
+        Expanded(
+          child: _PhotoPickButton(
+            icon: JhIcons.camera,
+            label: t.takePhoto,
+            caption: t.optionalSuffix,
+            onTap: () => state.pickPackagePhoto(fromCamera: true),
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _PhotoPickButton(
-                  icon: JhIcons.camera,
-                  label: t.takePhoto,
-                  onTap: () => state.pickPackagePhoto(fromCamera: true),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _PhotoPickButton(
-                  icon: JhIcons.gallery,
-                  label: t.chooseFromGallery,
-                  onTap: () => state.pickPackagePhoto(fromCamera: false),
-                ),
-              ),
-            ],
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _PhotoPickButton(
+            icon: JhIcons.gallery,
+            label: t.chooseFromGallery,
+            caption: t.optionalSuffix,
+            onTap: () => state.pickPackagePhoto(fromCamera: false),
           ),
-        ],
+        ),
       ],
     );
   }
@@ -166,18 +344,20 @@ class _PhotoPickButton extends StatelessWidget {
   const _PhotoPickButton({
     required this.icon,
     required this.label,
+    required this.caption,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
+  final String caption;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: label,
+      label: '$label. $caption',
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
@@ -186,7 +366,7 @@ class _PhotoPickButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: JhColors.surface,
             borderRadius: BorderRadius.circular(JhRadii.control),
-            boxShadow: JhShadows.card,
+            border: Border.all(color: JhColors.cardBorder),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -199,6 +379,15 @@ class _PhotoPickButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: JhText.ui(size: 12, weight: FontWeight.w700),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                caption,
+                style: JhText.ui(
+                  size: 10.5,
+                  weight: FontWeight.w500,
+                  color: JhColors.textFaint,
+                ),
               ),
             ],
           ),
@@ -259,6 +448,131 @@ class _PhotoThumb extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// The handling-notes textarea, a live character counter next to its label,
+/// and a row of one-tap suggestion chips that add or remove themselves from
+/// the text -- tapping "Fragile" twice leaves the note the way it started.
+class _HandlingNotes extends StatelessWidget {
+  const _HandlingNotes({
+    required this.value,
+    required this.onChanged,
+    required this.t,
+  });
+
+  final String value;
+  final ValueChanged<String> onChanged;
+  final JhStrings t;
+
+  static const _maxLength = 140;
+
+  void _toggle(String word) {
+    final has = value
+        .split(',')
+        .map((w) => w.trim())
+        .contains(word);
+    final parts = value
+        .split(',')
+        .map((w) => w.trim())
+        .where((w) => w.isNotEmpty)
+        .toList();
+    if (has) {
+      parts.remove(word);
+    } else {
+      parts.add(word);
+    }
+    onChanged(parts.join(', '));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <String>[
+      t.handlingChipFragile,
+      t.handlingChipUpright,
+      t.handlingChipCold,
+    ];
+    final active = value.split(',').map((w) => w.trim()).toSet();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(JhIcons.edit, size: 13, color: JhColors.textFaint),
+            const SizedBox(width: 6),
+            _SectionLabel(t.handlingLabel),
+            const Spacer(),
+            Text(
+              '${value.length}/$_maxLength',
+              style: JhText.mono(size: 10.5, color: JhColors.textFaint),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        JhTextArea(
+          value: value,
+          onChanged: (v) =>
+              onChanged(v.length > _maxLength ? v.substring(0, _maxLength) : v),
+          placeholder: t.handlingHint,
+          minLines: 2,
+          maxLines: 4,
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final chip in chips)
+              _SuggestionChip(
+                label: chip,
+                active: active.contains(chip),
+                onTap: () => _toggle(chip),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SuggestionChip extends StatelessWidget {
+  const _SuggestionChip({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: active,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: active ? JhColors.primaryTint : JhColors.surfaceMuted,
+            borderRadius: BorderRadius.circular(JhRadii.pill),
+          ),
+          child: Text(
+            label,
+            style: JhText.ui(
+              size: 12,
+              weight: FontWeight.w700,
+              color: active ? JhColors.primaryText : JhColors.textMuted,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
