@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../api/api_models.dart';
 import '../api/auth_api.dart';
 import '../l10n/dict.dart';
-import '../orders/geo_location_service.dart';
+import '../orders/google_places_location_service.dart';
 import '../orders/image_picker_photo_service.dart';
 import '../orders/location_service.dart';
 import '../orders/order_models.dart';
@@ -121,7 +121,7 @@ class JhAppState extends ChangeNotifier {
     JhOrdersApi? ordersApi,
     bool checkSessionOnStart = true,
   }) : api = api ?? JhHttpAuthApi(),
-       location = location ?? JhGeoLocationService(),
+       location = location ?? JhGooglePlacesLocationService(),
        photos = photos ?? JhImagePickerPhotoService(),
        ordersApi = ordersApi ?? JhHttpOrdersApi() {
     if (checkSessionOnStart) {
@@ -212,6 +212,7 @@ class JhAppState extends ChangeNotifier {
   JhRoutePhase routePhase = JhRoutePhase.pickup;
   JhPickupMode pickupMode = JhPickupMode.manual;
   String pickupError = '';
+  String dropoffError = '';
   JhOrder? selectedOrder;
 
   /// True while a step is open because "Edit" was tapped on Review -- its
@@ -838,6 +839,7 @@ class JhAppState extends ChangeNotifier {
     routePhase = JhRoutePhase.pickup;
     pickupMode = JhPickupMode.manual;
     pickupError = '';
+    dropoffError = '';
     recipientNameErr = '';
     recipientPhoneErr = '';
     declarationErr = '';
@@ -875,6 +877,19 @@ class JhAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Spends a search suggestion: resolves it to a point, then applies it the
+  /// same way [pickupSelectPlace] does. A failed lookup surfaces the same
+  /// banner a declined GPS permission does, rather than silently doing
+  /// nothing -- the customer typed a real address and tapped a real result.
+  Future<void> pickupSelectPrediction(JhPlacePrediction prediction) async {
+    try {
+      pickupSelectPlace(await location.resolve(prediction));
+    } catch (_) {
+      pickupError = t.placeLookupFailed;
+      notifyListeners();
+    }
+  }
+
   /// Remembers a point for next time -- most-recent-first, de-duplicated by
   /// address, capped so the list stays a shortcut rather than a second inbox.
   void _rememberPlace(JhPlace place) {
@@ -886,7 +901,8 @@ class JhAppState extends ChangeNotifier {
     }
   }
 
-  Future<List<JhPlace>> pickupSearch(String query) => location.search(query);
+  Future<List<JhPlacePrediction>> pickupSearch(String query) =>
+      location.search(query);
 
   Future<void> pickupPinMoved(double lat, double lng) async {
     draft.pickupLat = lat;
@@ -973,7 +989,18 @@ class JhAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<JhPlace>> dropoffSearch(String query) => location.search(query);
+  /// Mirrors [pickupSelectPrediction] for the drop-off half.
+  Future<void> dropoffSelectPrediction(JhPlacePrediction prediction) async {
+    try {
+      dropoffSelectPlace(await location.resolve(prediction));
+    } catch (_) {
+      dropoffError = t.placeLookupFailed;
+      notifyListeners();
+    }
+  }
+
+  Future<List<JhPlacePrediction>> dropoffSearch(String query) =>
+      location.search(query);
 
   Future<void> dropoffPinMoved(double lat, double lng) async {
     draft.dropoffLat = lat;
@@ -1177,6 +1204,7 @@ class JhAppState extends ChangeNotifier {
     routePhase = JhRoutePhase.dropoff;
     pickupMode = JhPickupMode.manual;
     pickupError = '';
+    dropoffError = '';
     recipientNameErr = '';
     recipientPhoneErr = '';
     declarationErr = '';
@@ -1259,6 +1287,7 @@ class JhAppState extends ChangeNotifier {
     routePhase = JhRoutePhase.pickup;
     pickupMode = JhPickupMode.manual;
     pickupError = '';
+    dropoffError = '';
     _editingFromReview = false;
     selectedOrder = null;
     cancelOrderOpen = false;

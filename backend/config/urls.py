@@ -14,6 +14,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from authentication import views
 from orders import views as order_views
+from places import views as place_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -82,6 +83,23 @@ urlpatterns = [
         "api/orders/<uuid:order_id>/rate",
         order_views.OrderRateView.as_view(),
         name="order-rate",
+    ),
+
+    # Places (address search, Google-backed)
+    path(
+        "api/places/autocomplete",
+        place_views.PlacesAutocompleteView.as_view(),
+        name="places-autocomplete",
+    ),
+    path(
+        "api/places/details",
+        place_views.PlaceDetailsView.as_view(),
+        name="places-details",
+    ),
+    path(
+        "api/places/reverse-geocode",
+        place_views.ReverseGeocodeView.as_view(),
+        name="places-reverse-geocode",
     ),
 
     # Contract (section 29): the schema the mobile team builds against.

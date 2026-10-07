@@ -235,6 +235,7 @@ class JhStrings {
     required this.pickupInstructionsHint,
     required this.pickupConfirm,
     required this.pickupDenied,
+    required this.placeLookupFailed,
     required this.recipientTitle,
     required this.recipientSub,
     required this.recipientNameLabel,
@@ -537,6 +538,7 @@ class JhStrings {
   final String pickupInstructionsHint;
   final String pickupConfirm;
   final String pickupDenied;
+  final String placeLookupFailed;
   final String recipientTitle;
   final String recipientSub;
   final String recipientNameLabel;
@@ -841,6 +843,7 @@ class JhStrings {
     pickupConfirm: 'Confirm Location',
     pickupDenied:
         'Location access is off. Choose your pickup point on the map instead.',
+    placeLookupFailed: 'Could not get that location. Please try again.',
     recipientTitle: 'Recipient Details',
     recipientSub: 'Who will receive the package?',
     recipientNameLabel: 'Recipient Name',
@@ -1150,6 +1153,7 @@ class JhStrings {
     pickupConfirm: 'Thibitisha Mahali',
     pickupDenied:
         'Ufikiaji wa mahali umezimwa. Chagua mahali pa kuchukua kwenye ramani.',
+    placeLookupFailed: 'Imeshindwa kupata eneo hilo. Tafadhali jaribu tena.',
     recipientTitle: 'Taarifa za Mpokeaji',
     recipientSub: 'Nani atapokea kifurushi?',
     recipientNameLabel: 'Jina la Mpokeaji',

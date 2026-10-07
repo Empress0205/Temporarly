@@ -6,13 +6,14 @@ import 'package:latlong2/latlong.dart';
 import '../../state/app_state.dart';
 import '../../theme/icons.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/jh_buttons.dart';
+import '../../widgets/jh_feedback.dart';
 import '../../widgets/jh_fields.dart';
 import '../../widgets/jh_scope.dart';
 import '../../widgets/jh_spinner.dart';
 import '../location_service.dart';
 import '../widgets/jh_pickup_map.dart';
 import '../widgets/jh_recent_places.dart';
+import '../widgets/jh_wizard_controls.dart';
 import '../widgets/jh_wizard_scaffold.dart';
 
 /// Step 4 — where the parcel is delivered. Always the map/search form: the
@@ -30,7 +31,7 @@ class _JhDestinationStepState extends State<JhDestinationStep> {
   static const _debounceDelay = Duration(milliseconds: 400);
 
   final TextEditingController _search = TextEditingController();
-  List<JhPlace> _results = const [];
+  List<JhPlacePrediction> _results = const [];
   bool _searching = false;
   Timer? _debounce;
 
@@ -76,15 +77,16 @@ class _JhDestinationStepState extends State<JhDestinationStep> {
     return JhWizardScaffold(
       step: 1,
       stepCount: JhAppState.orderStepCount,
-      crumb: '${t.stepTitleRoute} · ${t.stepTitleDestination}',
+      crumb: t.stepTitleDestination,
       stepLabel: state.stepLabel(1),
       title: t.destinationTitle,
-      subtitle: t.destinationSub,
       onBack: state.back,
       toastVisible: state.toast.isNotEmpty,
       body: [
+        JhErrorBlock(message: state.dropoffError),
         JhFieldShell(
           borderColor: JhColors.cardBorder,
+          radius: JhRadii.card,
           child: Row(
             children: [
               const Icon(JhIcons.search, size: 18, color: JhColors.textMuted),
@@ -108,29 +110,22 @@ class _JhDestinationStepState extends State<JhDestinationStep> {
         ),
         if (_results.isNotEmpty) ...[
           const SizedBox(height: 8),
-          for (final place in _results)
+          for (final prediction in _results)
             _ResultRow(
-              place: place,
-              onTap: () {
-                state.dropoffSelectPlace(place);
+              prediction: prediction,
+              onTap: () async {
                 setState(() => _results = const []);
                 _search.clear();
+                await state.dropoffSelectPrediction(prediction);
               },
             ),
-        ] else if (draft.dropoffAddress.trim().isEmpty &&
-            state.recentPlaces.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          JhRecentPlaces(
-            places: state.recentPlaces,
-            onSelect: state.dropoffSelectPlace,
-            t: t,
-          ),
         ],
         const SizedBox(height: 14),
         JhPickupMap(
           live: state.liveMap,
           center: center,
           draggable: true,
+          radius: JhRadii.card,
           onPinMoved: (p) => state.dropoffPinMoved(p.latitude, p.longitude),
         ),
         const SizedBox(height: 10),
@@ -142,22 +137,19 @@ class _JhDestinationStepState extends State<JhDestinationStep> {
             color: JhColors.textFaint,
           ),
         ),
-        if (draft.dropoffAddress.isNotEmpty) ...[
-          const SizedBox(height: 6),
-          Text(
-            draft.dropoffAddress,
-            style: JhText.ui(size: 14.5, weight: FontWeight.w800),
-          ),
-        ],
+        const SizedBox(height: 20),
+        JhSectionLabel(t.pickupAddressLabel),
+        const SizedBox(height: 6),
+        JhUnderlineDisplay(
+          value: draft.dropoffAddress.trim().isEmpty ? '—' : draft.dropoffAddress,
+        ),
         const SizedBox(height: 18),
-        JhLabeledField(
-          label: '${t.pickupLandmarkLabel} (${t.optionalSuffix})',
-          child: JhTextField(
-            value: draft.dropoffLandmark,
-            onChanged: state.setDropoffLandmark,
-            placeholder: t.destinationLandmarkHint,
-            hasError: false,
-          ),
+        JhSectionLabel(t.pickupLandmarkLabel),
+        const SizedBox(height: 6),
+        JhUnderlineField(
+          value: draft.dropoffLandmark,
+          onChanged: state.setDropoffLandmark,
+          placeholder: t.destinationLandmarkHint,
         ),
         const SizedBox(height: 18),
         JhLabeledField(
@@ -168,24 +160,30 @@ class _JhDestinationStepState extends State<JhDestinationStep> {
             placeholder: t.recipientDeliveryHint,
             minLines: 1,
             maxLines: 3,
+            radius: JhRadii.card,
           ),
         ),
+        if (state.recentPlaces.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          JhRecentPlaces(
+            places: state.recentPlaces,
+            onSelect: state.dropoffSelectPlace,
+            t: t,
+          ),
+        ],
       ],
-      footer: JhPrimaryButton(
+      footer: JhContinueCapsule(
         label: t.destinationConfirm,
-        onPressed: state.confirmDestination,
-        enabled: state.draft.hasDropoff,
-        radius: JhRadii.control,
-        elevated: false,
+        onPressed: state.draft.hasDropoff ? state.confirmDestination : null,
       ),
     );
   }
 }
 
 class _ResultRow extends StatelessWidget {
-  const _ResultRow({required this.place, required this.onTap});
+  const _ResultRow({required this.prediction, required this.onTap});
 
-  final JhPlace place;
+  final JhPlacePrediction prediction;
   final VoidCallback onTap;
 
   @override
@@ -198,8 +196,8 @@ class _ResultRow extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 6),
         decoration: BoxDecoration(
           color: JhColors.surface,
-          borderRadius: BorderRadius.circular(JhRadii.control),
-          boxShadow: JhShadows.card,
+          borderRadius: BorderRadius.circular(JhRadii.card),
+          border: Border.all(color: JhColors.cardBorder),
         ),
         child: Row(
           children: [
@@ -207,7 +205,7 @@ class _ResultRow extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                place.address,
+                prediction.description,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: JhText.ui(size: 13, weight: FontWeight.w600),

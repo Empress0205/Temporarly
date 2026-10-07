@@ -12,6 +12,7 @@ import '../../widgets/jh_spinner.dart';
 import '../location_service.dart';
 import '../widgets/jh_pickup_map.dart';
 import '../widgets/jh_recent_places.dart';
+import '../widgets/jh_wizard_controls.dart';
 import '../widgets/jh_wizard_scaffold.dart';
 
 /// Step 1 — where the parcel is collected. Search-first, the same idea as
@@ -96,7 +97,7 @@ class _ManualFormState extends State<_ManualForm> {
   static const _debounceDelay = Duration(milliseconds: 400);
 
   final TextEditingController _search = TextEditingController();
-  List<JhPlace> _results = const [];
+  List<JhPlacePrediction> _results = const [];
   bool _searching = false;
   Timer? _debounce;
 
@@ -184,13 +185,13 @@ class _ManualFormState extends State<_ManualForm> {
         ),
         if (_results.isNotEmpty) ...[
           const SizedBox(height: 8),
-          for (final place in _results)
+          for (final prediction in _results)
             _ResultRow(
-              place: place,
-              onTap: () {
-                state.pickupSelectPlace(place);
+              prediction: prediction,
+              onTap: () async {
                 setState(() => _results = const []);
                 _search.clear();
+                await state.pickupSelectPrediction(prediction);
               },
             ),
         ],
@@ -225,17 +226,17 @@ class _ManualFormState extends State<_ManualForm> {
           ),
         ),
         const SizedBox(height: 20),
-        _SectionLabel(t.pickupAddressLabel),
+        JhSectionLabel(t.pickupAddressLabel),
         const SizedBox(height: 6),
-        _UnderlineDisplay(
+        JhUnderlineDisplay(
           value: draft.pickupAddress.trim().isEmpty
               ? '—'
               : draft.pickupAddress,
         ),
         const SizedBox(height: 18),
-        _SectionLabel(t.pickupLandmarkLabel),
+        JhSectionLabel(t.pickupLandmarkLabel),
         const SizedBox(height: 6),
-        _UnderlineField(
+        JhUnderlineField(
           value: draft.pickupLandmark,
           onChanged: state.setPickupLandmark,
           placeholder: t.pickupLandmarkHint,
@@ -249,130 +250,9 @@ class _ManualFormState extends State<_ManualForm> {
           ),
         ],
       ],
-      footer: _ContinueCapsule(
+      footer: JhContinueCapsule(
         label: t.pickupConfirm,
         onPressed: state.draft.hasPickup ? state.confirmPickup : null,
-      ),
-    );
-  }
-}
-
-/// Full capsule, dark text on orange -- same local language as the other
-/// redesigned wizard steps.
-class _ContinueCapsule extends StatelessWidget {
-  const _ContinueCapsule({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback? onPressed;
-
-  static const _height = 56.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled = onPressed != null;
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: label,
-      child: GestureDetector(
-        onTap: onPressed,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          height: _height,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: enabled ? JhColors.primary : JhColors.primaryDisabled,
-            borderRadius: BorderRadius.circular(_height / 2),
-          ),
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: JhText.ui(size: 16, weight: FontWeight.w800, color: JhColors.ink),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The small uppercase, tracked-letter-spacing group header above the
-/// Address/Landmark fields -- same role as the Package step's section
-/// labels.
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Text(
-    text.toUpperCase(),
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-    style: JhText.ui(
-      size: 11,
-      weight: FontWeight.w800,
-      letterSpacing: 0.6,
-      color: JhColors.textFaint,
-    ),
-  );
-}
-
-/// Read-only text with the same bottom-rule look as [_UnderlineField] --
-/// the resolved address, which is set by search/GPS/the map, not typed here.
-class _UnderlineDisplay extends StatelessWidget {
-  const _UnderlineDisplay({required this.value});
-
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(bottom: 8),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: JhColors.cardBorder)),
-      ),
-      child: Text(
-        value,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: JhText.ui(size: 15, weight: FontWeight.w800),
-      ),
-    );
-  }
-}
-
-/// A borderless field with just a bottom rule -- the Landmark field.
-class _UnderlineField extends StatefulWidget {
-  const _UnderlineField({
-    required this.value,
-    required this.onChanged,
-    required this.placeholder,
-  });
-
-  final String value;
-  final ValueChanged<String> onChanged;
-  final String placeholder;
-
-  @override
-  State<_UnderlineField> createState() => _UnderlineFieldState();
-}
-
-class _UnderlineFieldState extends State<_UnderlineField>
-    with JhControllerSync<_UnderlineField> {
-  @override
-  Widget build(BuildContext context) {
-    syncController(widget.value);
-    return Container(
-      padding: const EdgeInsets.only(bottom: 8),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: JhColors.cardBorder)),
-      ),
-      child: EditableTextField(
-        controller: controller,
-        onChanged: widget.onChanged,
-        placeholder: widget.placeholder,
-        style: JhText.ui(size: 15, weight: FontWeight.w600),
       ),
     );
   }
@@ -461,9 +341,9 @@ class _Banner extends StatelessWidget {
 }
 
 class _ResultRow extends StatelessWidget {
-  const _ResultRow({required this.place, required this.onTap});
+  const _ResultRow({required this.prediction, required this.onTap});
 
-  final JhPlace place;
+  final JhPlacePrediction prediction;
   final VoidCallback onTap;
 
   @override
@@ -485,7 +365,7 @@ class _ResultRow extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                place.address,
+                prediction.description,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: JhText.ui(size: 13, weight: FontWeight.w600),

@@ -12,6 +12,7 @@ import '../../widgets/jh_fields.dart';
 import '../../widgets/jh_scope.dart';
 import '../../widgets/jh_stepper.dart';
 import '../order_models.dart';
+import '../widgets/jh_wizard_controls.dart';
 import '../widgets/jh_wizard_scaffold.dart';
 
 /// Step 3 — what is being sent.
@@ -33,7 +34,7 @@ class JhPackageStep extends StatelessWidget {
       onBack: state.back,
       toastVisible: state.toast.isNotEmpty,
       body: [
-        _SectionLabel(t.packageTypeLabel),
+        JhSectionLabel(t.packageTypeLabel),
         const SizedBox(height: 10),
         JhChoiceChipGrid<JhPackageType>(
           selected: draft.packageType,
@@ -47,9 +48,9 @@ class JhPackageStep extends StatelessWidget {
         // already says what it is.
         if (draft.packageType == JhPackageType.other) ...[
           const SizedBox(height: 18),
-          _SectionLabel(t.describeItemLabel, color: JhColors.primaryText),
+          JhSectionLabel(t.describeItemLabel, color: JhColors.primaryText),
           const SizedBox(height: 8),
-          _UnderlineField(
+          JhUnderlineField(
             value: draft.packageDescription,
             onChanged: state.setPackageDescription,
             placeholder: t.packageDescriptionHint,
@@ -58,8 +59,8 @@ class JhPackageStep extends StatelessWidget {
         const SizedBox(height: 20),
         Row(
           children: [
-            Expanded(child: _SectionLabel(t.packageSizeLabel)),
-            _SectionLabel(t.quantityLabel),
+            Expanded(child: JhSectionLabel(t.packageSizeLabel)),
+            JhSectionLabel(t.quantityLabel),
             const SizedBox(width: 10),
             JhStepper(value: draft.quantity, onChanged: state.setQuantity),
           ],
@@ -88,110 +89,9 @@ class JhPackageStep extends StatelessWidget {
           onChanged: state.setDeclarationAccepted,
         ),
       ],
-      footer: _ContinueCapsule(
+      footer: JhContinueCapsule(
         label: t.continueLabel,
         onPressed: state.nextOrderStep,
-      ),
-    );
-  }
-}
-
-/// Full capsule, dark text on orange -- the reference for this step shows
-/// this style Continue button, distinct from the other wizard steps' shared
-/// [JhPrimaryButton] (white text, not fully rounded), which stays untouched
-/// here since only this step's reference asked for the change.
-class _ContinueCapsule extends StatelessWidget {
-  const _ContinueCapsule({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback onPressed;
-
-  static const _height = 56.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: GestureDetector(
-        onTap: onPressed,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          height: _height,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: JhColors.primary,
-            borderRadius: BorderRadius.circular(_height / 2),
-          ),
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: JhText.ui(size: 16, weight: FontWeight.w800, color: JhColors.ink),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The small uppercase, tracked-letter-spacing group header this step uses
-/// above each cluster of choices ("TYPE", "SIZE", "QUANTITY", "HANDLING
-/// NOTES") -- distinct from [JhFieldLabel], which stays plain sentence case
-/// for an actual input's own label (the Register/Login fields). This is a
-/// section heading, the same role as Home's "QUICK ACTIONS".
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text, {this.color = JhColors.textFaint});
-
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Text(
-    text.toUpperCase(),
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-    style: JhText.ui(
-      size: 11,
-      weight: FontWeight.w800,
-      letterSpacing: 0.6,
-      color: color,
-    ),
-  );
-}
-
-/// A borderless field with just a bottom rule -- the "Describe the item"
-/// field that only appears once "Other" is picked.
-class _UnderlineField extends StatefulWidget {
-  const _UnderlineField({
-    required this.value,
-    required this.onChanged,
-    required this.placeholder,
-  });
-
-  final String value;
-  final ValueChanged<String> onChanged;
-  final String placeholder;
-
-  @override
-  State<_UnderlineField> createState() => _UnderlineFieldState();
-}
-
-class _UnderlineFieldState extends State<_UnderlineField>
-    with JhControllerSync<_UnderlineField> {
-  @override
-  Widget build(BuildContext context) {
-    syncController(widget.value);
-    return Container(
-      padding: const EdgeInsets.only(bottom: 8),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: JhColors.cardBorder)),
-      ),
-      child: EditableTextField(
-        controller: controller,
-        onChanged: widget.onChanged,
-        placeholder: widget.placeholder,
-        style: JhText.ui(size: 15, weight: FontWeight.w600),
       ),
     );
   }
@@ -502,7 +402,7 @@ class _HandlingNotes extends StatelessWidget {
           children: [
             const Icon(JhIcons.edit, size: 13, color: JhColors.textFaint),
             const SizedBox(width: 6),
-            _SectionLabel(t.handlingLabel),
+            JhSectionLabel(t.handlingLabel),
             const Spacer(),
             Text(
               '${value.length}/$_maxLength',

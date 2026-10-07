@@ -16,6 +16,23 @@ class JhPlace {
   final String address;
 }
 
+/// One autocomplete suggestion -- a label the customer can recognise, not yet
+/// a point. Google's Places API (and most real autocomplete APIs) only
+/// resolves coordinates on request, as a second call, because computing them
+/// for every prediction on every keystroke would be wasteful: [search]
+/// returns these cheaply, [JhLocationService.resolve] spends the one the
+/// customer actually picks.
+@immutable
+class JhPlacePrediction {
+  const JhPlacePrediction({required this.placeId, required this.description});
+
+  /// Opaque, provider-specific. Round-tripped back into [resolve] unchanged.
+  final String placeId;
+
+  /// What the customer sees in the suggestion list.
+  final String description;
+}
+
 enum JhLocationDenial { denied, deniedForever, serviceDisabled }
 
 class JhLocationException implements Exception {
@@ -39,7 +56,12 @@ abstract class JhLocationService {
   /// falls back to a `"lat, lng"` string.
   Future<String> addressOf(double lat, double lng);
 
-  /// Forward-geocodes the manual search field. Returns an empty list rather
-  /// than throwing when nothing matches.
-  Future<List<JhPlace>> search(String query);
+  /// Ranked suggestions for the manual search field. Returns an empty list
+  /// rather than throwing when nothing matches.
+  Future<List<JhPlacePrediction>> search(String query);
+
+  /// Resolves one suggestion from [search] to an actual point. Can throw --
+  /// unlike [search] and [addressOf], there is no reasonable fallback value
+  /// for "a place the customer explicitly chose, but we can't locate".
+  Future<JhPlace> resolve(JhPlacePrediction prediction);
 }

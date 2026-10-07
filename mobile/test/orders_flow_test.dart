@@ -204,7 +204,7 @@ void main() {
     ) async {
       final (state, loc) = await tester.boot();
       loc.searchResults = const [
-        JhPlace(lat: -6.70, lng: 39.20, address: 'Goba, Dar es Salaam'),
+        JhPlacePrediction(placeId: 'goba', description: 'Goba, Dar es Salaam'),
       ];
       await toWizard(tester, state);
       await tester.tapText(t.pickupUseCurrentLocation);
@@ -239,8 +239,13 @@ void main() {
     testWidgets('manual search selects a pickup place', (tester) async {
       final (state, loc) = await tester.boot();
       loc.searchResults = const [
-        JhPlace(lat: -6.8, lng: 39.28, address: 'Mbezi Beach, Dar es Salaam'),
+        JhPlacePrediction(placeId: 'mbezi', description: 'Mbezi Beach, Dar es Salaam'),
       ];
+      loc.resolvedPlace = const JhPlace(
+        lat: -6.8,
+        lng: 39.28,
+        address: 'Mbezi Beach, Dar es Salaam',
+      );
       await toWizard(tester, state);
 
       await tester.enterText(find.byType(TextField).first, 'Mbezi');
@@ -257,7 +262,7 @@ void main() {
     ) async {
       final (state, loc) = await tester.boot();
       loc.searchResults = const [
-        JhPlace(lat: -6.8, lng: 39.28, address: 'Mbezi Beach, Dar es Salaam'),
+        JhPlacePrediction(placeId: 'mbezi', description: 'Mbezi Beach, Dar es Salaam'),
       ];
       await toWizard(tester, state);
 

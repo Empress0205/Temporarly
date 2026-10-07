@@ -33,6 +33,7 @@ env = environ.Env(
     SMS_SENDER_ID=(str, ""),
     SMS_API_TOKEN=(str, ""),
     SMS_BASE_URL=(str, "https://sms.webline.africa/api/http"),
+    GOOGLE_PLACES_API_KEY=(str, ""),
     ORDER_MIN_PRICE_TSH=(int, 2000),
     # Placeholder rates -- see orders/pricing.py. No real per-km figure from
     # the client yet; these only preserve the old flat table's ratio.
@@ -82,6 +83,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "authentication",
     "orders",
+    "places",
 ]
 
 MIDDLEWARE = [
@@ -197,6 +199,9 @@ SMS_PROVIDER = env("SMS_PROVIDER")
 SMS_SENDER_ID = env("SMS_SENDER_ID")
 SMS_API_TOKEN = env("SMS_API_TOKEN")
 SMS_BASE_URL = env("SMS_BASE_URL")
+
+# --- Places search (see places/google_places.py) ------------------------------
+GOOGLE_PLACES_API_KEY = env("GOOGLE_PLACES_API_KEY")
 
 # --- Orders pricing (see orders/pricing.py) -----------------------------------
 ORDER_MIN_PRICE_TSH = env("ORDER_MIN_PRICE_TSH")
