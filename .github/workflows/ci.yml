@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend tests (Django)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: jihudumie
+          POSTGRES_PASSWORD: jihudumie_dev
+          POSTGRES_DB: jihudumie
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: Run the test suite
+        env:
+          DEBUG: "True"
+          SECRET_KEY: ci-only-secret-key-not-for-production
+          DATABASE_URL: postgres://jihudumie:jihudumie_dev@localhost:5432/jihudumie
+          OTP_PEPPER: ci-only-pepper
+          # 'memory' never makes a real request -- same provider the test
+          # suite itself uses locally (see authentication/tests/support.py).
+          SMS_PROVIDER: memory
+          GOOGLE_PLACES_API_KEY: ci-only-placeholder
+        run: python manage.py test
+
+  mobile:
+    name: Mobile tests (Flutter)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+      - run: flutter analyze
+
+      # Golden (pixel-comparison) tests are excluded here on purpose: even
+      # with the project's own bundled fonts loaded (see test/golden_test.dart),
+      # text rendering can differ subtly between operating systems/Skia
+      # builds, which makes raw pixel diffs across local (Windows) and CI
+      # (Ubuntu) runners an unreliable signal. They stay a local, manual
+      # check -- run `flutter test --update-goldens test/golden_test.dart`
+      # and look at the PNGs after any visual change, same as this project
+      # already does.
+      - name: Run the test suite (excluding golden image comparisons)
+        run: flutter test --exclude-tags golden,live

@@ -1,9 +1,11 @@
 # Jihudumie — Backend
 
-Django REST Framework backend for the Jihudumie customer app. Two modules so
-far: **Authentication** (specification §29–§30, §8–§13, §20–§25, §32–§37) and
+Django REST Framework backend for the Jihudumie customer app. Three modules so
+far: **Authentication** (specification §29–§30, §8–§13, §20–§25, §32–§37),
 **Orders** — a distance-priced delivery request API, built after the mobile
-app's Orders module had already shipped against local sample data.
+app's Orders module had already shipped against local sample data — and
+**Places**, a thin proxy in front of Google's Places API (New) and Geocoding
+API for address search.
 
 ## Running
 
@@ -11,7 +13,7 @@ app's Orders module had already shipped against local sample data.
 docker compose up -d                      # Postgres 16 on :5432
 .venv/Scripts/python manage.py migrate
 .venv/Scripts/python manage.py runserver
-.venv/Scripts/python manage.py test authentication orders   # 78 tests
+.venv/Scripts/python manage.py test       # 96 tests
 ```
 
 Interactive contract at `/api/docs`, machine-readable at `/api/schema`
@@ -19,6 +21,14 @@ Interactive contract at `/api/docs`, machine-readable at `/api/schema`
 
 In development `SMS_PROVIDER=logging` prints the code to the console instead of
 sending it, so every flow is exercisable with no provider and no credentials.
+Real delivery (`SMS_PROVIDER=webline`) is configured and has been used for live
+testing — `logging` is simply what's active in `.env` while OTP-gated flows are
+being tested repeatedly, to avoid spending SMS credit on every run. Flip it back
+before testing anything that depends on a real code actually arriving.
+
+`GOOGLE_PLACES_API_KEY` must be set for the `places` endpoints to work; without
+it they fail with `PLACES_LOOKUP_FAILED` (503) rather than crash. The key is
+never sent to the mobile app — see "Places decisions worth knowing" below.
 
 ## Layout
 
@@ -38,6 +48,9 @@ sending it, so every flow is exercisable with no provider and no credentials.
 | `orders/geo.py` | Haversine distance — kept parallel to `haversineKm` in the Flutter app |
 | `orders/services.py` | Create/list/cancel/rate, same thin-view/fat-service split as `authentication` |
 | `orders/admin.py` | Where driver assignment and stage/status actually happen right now (see below) |
+| `places/google_places.py` | The Google HTTP client — autocomplete, place details, reverse-geocode |
+| `places/services.py` | Translates `PlacesLookupError` into the one response envelope, same pattern as `authentication.sms.send_otp` |
+| `places/views.py` | `/api/places/autocomplete`, `/details`, `/reverse-geocode` — all auth-required |
 
 ## Decisions worth knowing
 
@@ -130,6 +143,32 @@ by Django itself while `DEBUG=True`. Production needs real object storage
 order, but nothing averages it back onto the driver yet — a reasonable
 follow-up once there's real rating volume, not built pre-emptively here.
 
+## Places decisions worth knowing
+
+**The API key never reaches the mobile app.** It lives in this backend's
+`.env` only; the app calls our own `/api/places/*` endpoints, which call
+Google. This also means every call is already behind the app's own JWT auth,
+so an unauthenticated caller can't run up the Google bill.
+
+**Session tokens are generated client-side, not here.** Google bills
+autocomplete + the details call that follows it as one session when they
+share a token — the backend just passes whatever token the app sends straight
+through to Google. See `mobile/lib/orders/google_places_location_service.dart`.
+
+**The resolved address prefers the autocomplete suggestion's own label over
+Google's `formattedAddress`.** The latter can fall back to a Plus Code
+(`"65QP+CG9, Dar es Salaam"`) for a point with no conventional street
+address — a real Google answer, but a worse one than the name the customer
+actually read and picked. That preference lives on the mobile side, not here;
+this backend still returns `formattedAddress` as `address`, since reverse-geocode
+(dragging the map pin) has no suggestion label to prefer and genuinely needs it.
+
+**Not yet switched: map tiles.** The map itself still renders free
+OpenStreetMap tiles (`flutter_map`); only address search is Google-backed. A
+full switch to Google Maps tiles would add a second, separate billing
+category (per map load) and a larger mobile-side rewrite — deliberately not
+done, see the mobile README.
+
 ## Accepted risk
 
 §15 and §19 require the API to say whether a number is registered, which is
@@ -139,8 +178,13 @@ known trade-off rather than discovered in a security review.
 
 ## Still to do
 
-- Real SMS provider (`sms.get_provider`) — needs credentials, sender ID,
-  payload shape and expected phone format.
+- Flip `SMS_PROVIDER` back to `webline` (credentials are already configured
+  in `.env`) before testing anything that depends on a real code arriving —
+  it's set to `logging` right now to avoid spending SMS credit while
+  OTP-gated flows are being tested repeatedly.
+- Reported SMS delivery delay on the live Webline account, cause not yet
+  confirmed (carrier/gateway-side, most likely) — nothing to fix here until
+  there's more information from Webline.
 - Schedule `otp.purge_expired`.
 - Production settings: `DEBUG=False`, real `SECRET_KEY` and `OTP_PEPPER`,
   HTTPS, a shared cache so throttling holds across processes.

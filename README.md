@@ -1,16 +1,18 @@
 # Jihudumie Logistics — Customer Platform
 
-**Customer authentication, plus an Orders module.** The mobile app's Orders
-screens shipped first against local sample data; the backend and the wiring
-between the two came after, and the app now creates, lists, cancels and rates
-real orders against it.
+**Customer authentication, an Orders module, and Google-backed address
+search.** The mobile app's Orders screens shipped first against local sample
+data; the backend and the wiring between the two came after, and the app now
+creates, lists, cancels and rates real orders against it. Address search
+(autocomplete, place resolution, reverse-geocode) is proxied through the
+backend's `places` app so the Google API key never ships to the app.
 
 Two deployables, one repository:
 
 | Directory | What it is | Stack |
 | --- | --- | --- |
 | [mobile/](mobile/) | Customer mobile app | Flutter (Android, iOS, web) |
-| [backend/](backend/) | Authentication + Orders API | Django REST Framework, PostgreSQL |
+| [backend/](backend/) | Authentication + Orders + Places API | Django REST Framework, PostgreSQL |
 
 Each has its own README covering how to run it and the decisions behind it.
 
@@ -35,9 +37,18 @@ credentials.
 ## Tests
 
 ```bash
-cd backend && .venv/Scripts/python manage.py test authentication orders   # 78
-cd mobile  && flutter test                                         # 103 (+1 skipped)
+cd backend && .venv/Scripts/python manage.py test   # 96
+cd mobile  && flutter test                          # 103 (+1 skipped)
 ```
+
+CI (`.github/workflows/ci.yml`) runs both on every push/PR to `main` —
+`flutter analyze` plus the non-golden mobile suite, and the full backend
+suite against a real Postgres service container. Golden (pixel-comparison)
+tests are intentionally excluded from CI: even with the project's own
+bundled fonts loaded, rendering can differ subtly between operating systems,
+so they stay a local, manual check (`flutter test --update-goldens
+test/golden_test.dart`, then look at the PNGs) rather than an automated gate
+that could fail for reasons that have nothing to do with a real regression.
 
 The mobile suite's live-wiring test, `test/live_wiring_test.dart`, is tagged `live`
 and skipped by default — it opens a real socket to a running backend rather
@@ -87,6 +98,13 @@ it — whatever `price_tsh` comes back on an order is what's shown, full stop.
 **Vehicle types.** Both sides offer the same four — motorcycle, bajaji, car,
 lorry (`VAN` on the wire) — matching the driver app being built alongside
 this one; all four are bookable on both sides now.
+
+**Places API key stays server-side.** The mobile app never holds a Google
+API key or calls Google directly — it calls the backend's `/api/places/*`,
+which calls Google. Session tokens (what makes Google bill a search +
+selection as one unit instead of per keystroke) are generated on the mobile
+side and passed through the backend unchanged; the backend never generates
+or inspects them.
 
 **Brand palette.** The client fixed the visual identity: Primary Orange
 `#F7941D`, Charcoal `#2D2D2D`, Operations Green `#2D8B4E`, Warm Accent
